@@ -1,0 +1,4 @@
+probe syscall.setitimer
+{
+  printf ("setitimer syscall: %s[%d], args=[%s]\n", execname(), pid(), argstr)
+}

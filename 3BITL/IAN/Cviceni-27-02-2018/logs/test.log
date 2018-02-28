@@ -1,0 +1,11 @@
+shell pid[3627]: SigCgt:	0000000000010002
+
+PING 2001:67c:1220:80c:21a:4aff:fe97:5e13(2001:67c:1220:80c:21a:4aff:fe97:5e13) 56 data bytes
+
+--- 2001:67c:1220:80c:21a:4aff:fe97:5e13 ping statistics ---
+1 packets transmitted, 0 received, 100% packet loss, time 0ms
+
+
+real	0m1,005s
+user	0m0,002s
+sys	0m0,000s
