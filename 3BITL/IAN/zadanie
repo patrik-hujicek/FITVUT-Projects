@@ -1,0 +1,72 @@
+Cilem projektu je seznamit se se zpusobem prace s ELF soubory. Vasim ukolem je napsat
+zjednodusenou verzi nastroje nm(1). Nastroj nemusi podporovat zadne options, pri
+volani bude vyzadovat prave jeden argument, cimz je jmeno ELF souboru, na ktery
+bude zavolan. Nastroj muze podporovat pouze 64-bit ELF soubory.  Nastroj tez
+nemusi rozklicovavat typ symbolu, staci, kdyz vypise symbol binding a type tak,
+jak jsou definovany makry ELF64_ST_BIND() a ELF64_ST_TYPE().
+
+Odevzdani by melo mit formu .tar (ci .tar.gz) archivu, ktery obsahuje adresar, ktery obsahuje vsechny Vase zdrojove a pripadne hlavickove soubory, a navic Makefile, ktery podporuje minimalne makra "all" pro build a "clean" pro vycisteni adresare. Vase reseni budeme kontrolovat manualne, jde nam predevsim o Vas kod, nikoli a presny format odevzdani.
+
+Priklad behu programu pri spusteni na standardni "Hello world" program muze
+vypadat nasledovne:
+
+$ ./cda-proj1 test/test
+   value bind type  size name
+00000000    0    4 crtstuff.c
+00400430    0    2 deregister_tm_clones
+00400460    0    2 register_tm_clones
+004004a0    0    2 __do_global_dtors_aux
+00601024    0    1 completed.6973
+00600e18    0    1 __do_global_dtors_aux_fini_array_entry
+004004d0    0    2 frame_dummy
+00600e10    0    1 __frame_dummy_init_array_entry
+00000000    0    4 test.c
+00000000    0    4 crtstuff.c
+004006bc    0    1 __FRAME_END__
+00600e18    0    0 __init_array_end
+00600e20    0    1 _DYNAMIC
+00600e10    0    0 __init_array_start
+0040059c    0    0 __GNU_EH_FRAME_HDR
+00601000    0    1 _GLOBAL_OFFSET_TABLE_
+00400570    1    2 __libc_csu_fini
+00601020    2    0 data_start
+00000000    1    2 puts@@GLIBC_2.2.5
+00601024    1    0 _edata
+00400574    1    2 _fini
+00000000    1    2 __libc_start_main@@GLIBC_2.2.5
+00601020    1    0 __data_start
+00000000    2    0 __gmon_start__
+00400588    1    1 __dso_handle
+00400580    1    1 _IO_stdin_used
+00400500    1    2 __libc_csu_init
+00601028    1    0 _end
+00400400    1    2 _start
+00601024    1    0 __bss_start
+004004d7    1    2 main
+00601028    1    1 __TMC_END__
+004003c8    1    2 _init
+
+K reseni se Vam muze hodit specifikace formatu ELF kterou naleznete zde:
+
+http://refspecs.linuxbase.org/elf/elf.pdf
+
+Vhodne je precist si specifikaci alespon String a Symbol table.
+
+Vizte prosim hlavickovy soubor elf.h, ktery je soucasti glibc. Obsahuje definice
+vsech maker standardu ELF, ktere by se Vam mohly hodit.
+
+Samozrejme vse muzete naprogramovat za pomoci standardni funkci. V takovem
+pripade prosim nepouzivejte pro cteni souboru read(2) a jeho varianty, ale
+mmap(2).
+
+Vhodnejsi muze byt pouziti nejake knihovny pro cteni formatu ELF, napriklad
+libelf, ktera je soucasti projektu elfutils, ktere naleznete zde:
+
+https://sourceware.org/elfutils/
+
+Vase distribuce Linuxu pravdepodobne elfutils nabizi mezi standardnimi balicky.
+Existuje take implementace libelf pro jine Unix a Unix-like systemy.
+
+elfutils take poskytuji hlavickovy soubor gelf.h, ktery je mozne pouzit pro
+abstrakci na 32-bit a 64-bit soubory.
+

@@ -1,0 +1,107 @@
+#outer-frame {
+	width: 410px;
+	height:400px;
+	background-repeat: no-repeat, no-repeat, no-repeat, no-repeat,
+					   repeat-x, repeat-x, repeat-y, repeat-y;
+	background-position:left top, right top, left bottom, right bottom,
+						top, bottom, left, right;
+	padding:100px;
+	position:relative;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:0.85em;
+	text-align: justify;
+	border-radius: 10pt;
+	border-style: solid;
+	border-width:2px;
+	background-image: url("./images/blue/tl.png"), url("./images/blue/tr.png"), 
+					  url("./images/blue/bl.png"), url("./images/blue/br.png"),
+					  url("./images/blue/t.png"), url("./images/blue/b.png"),
+					  url("./images/blue/l.png"), url("./images/blue/r.png");
+}
+
+#outer-frame div#underlying-frame{
+	position:absolute;
+	background-color:#C8C8C8;
+	margin:22px;
+	height:350px;
+	width: 370px;
+	box-shadow: 5px 5px 3px grey;
+	z-index:1;
+	top:100px;
+}
+
+#outer-frame #inner-frame{
+	position:absolute;
+	height: 270px;
+	width: 270px;
+	background-color:#0c0;
+	border-radius: 10pt;
+	border-style: solid;
+	border-width:2px;
+	border-color:grey;
+	top:160px;
+	left: 170px;
+	z-index:2;
+}
+
+div#outer-frame #inner-frame p{
+	text-shadow: 2px 2px 5px;
+	margin:7px;
+}
+
+#selector {
+	border: 1px dashed black;
+	display: inline-block;
+	width: 610px;
+	margin:auto;
+}
+
+#selector div {
+	display: inline-block;
+}
+
+#goleft {
+	float: left;
+	padding-top: 17%;
+	padding-left: 1%;
+	padding-right: 1%;
+}
+
+#goright {
+	float: right;
+	padding-top: 17%;
+	padding-left: 1%;
+	padding-right: 1%;
+}
+
+#red {
+	display: none;
+}
+
+#blue {
+	float: left;
+}
+
+
+.blue{
+	background-image: url("./images/blue/tl.png"), url("./images/blue/tr.png"), 
+					  url("./images/blue/bl.png"), url("./images/blue/br.png"),
+					  url("./images/blue/t.png"), url("./images/blue/b.png"),
+					  url("./images/blue/l.png"), url("./images/blue/r.png");
+}
+
+.red{
+	background-image: url("./images/red/tl.png"), url("./images/red/tr.png"), 
+					  url("./images/red/bl.png"), url("./images/red/br.png"),
+					  url("./images/red/t.png"), url("./images/red/b.png"),
+					  url("./images/red/l.png"), url("./images/red/r.png");
+}
+
+.yellow{
+	background-image: url("./images/yellow/tl.png"), url("./images/yellow/tr.png"), 
+					  url("./images/yellow/bl.png"), url("./images/yellow/br.png"),
+					  url("./images/yellow/t.png"), url("./images/yellow/b.png"),
+					  url("./images/yellow/l.png"), url("./images/yellow/r.png");
+}
+
+

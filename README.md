@@ -122,3 +122,15 @@ Zabezpečení dat pomocí 16/32-bit. kódu CRC (12/14)
 
 Cvicenia (16/16)
 
+#### Letny semester
+
+**ITW**
+
+1. projekt (13/20)
+
+Cvicenia (10/10)
+
+**IAN**
+
+1. projekt (20/20)
+

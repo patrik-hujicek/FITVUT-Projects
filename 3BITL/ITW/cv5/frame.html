@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="cs" lang="cs">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Language" content="cs">
+    <meta name="robots" content="index, follow">
+    <meta name="description" content="">
+    <meta name="keywords" content="" lang="cs">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <title>CSS3 test</title>
+    <script type="text/javascript" src="jquery-1.9.1.min.js"></script>
+    <script type="text/javascript">
+			$(document).ready(function () {
+
+				$("#outer-frame").addClass("blue");
+
+				var color = "blue";
+
+				$("#blue").click(function () {
+					$("#outer-frame").removeClass(color);
+					color = "blue";
+					$("#outer-frame").addClass("blue");
+				});
+
+				$("#red").click(function () {
+					$("#outer-frame").removeClass(color);
+					color = "red";
+					$("#outer-frame").addClass("red");
+				});
+
+				$("#yellow").click(function () {
+					$("#outer-frame").removeClass(color);
+					color = "yellow";
+					$("#outer-frame").addClass("yellow");
+				});
+
+				var position = 0;
+				$("#goleft").click(function () {
+					position = position - 1;
+					if (position < 0) {
+						position = 2;
+					}
+					changeColor(position);
+				});
+
+				$("#goright").click(function () {
+					position = position + 1;
+					if (position > 2) {
+						position = 0;
+					}
+					changeColor(position);
+				});
+
+				function changeColor(pos) {
+					if (pos == 0) {
+						$("#blue").css("display", "inline-block");
+						$("#blue").css("float", "right");
+						$("#yellow").css("display", "inline-block");
+						$("#yellow").css("float", "left");
+						$("#red").css("display", "none");
+						$("#red").css("float", "none");
+					}
+					if (pos == 1) {
+						$("#blue").css("display", "none");
+						$("#blue").css("float", "none");
+						$("#yellow").css("display", "inline-block");
+						$("#yellow").css("float", "right");
+						$("#red").css("display", "inline-block");
+						$("#red").css("float", "left");
+					}
+					if (pos == 2) {
+						$("#blue").css("display", "inline-block");
+						$("#blue").css("float", "left");
+						$("#yellow").css("display", "none");
+						$("#yellow").css("float", "none");
+						$("#red").css("display", "inline-block");
+						$("#red").css("float", "right");
+					}
+				}
+		
+        });
+    </script>
+    
+</head>
+<body>
+    <div id="outer-frame">
+        <div id="inner-frame">
+            <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vehicula dui eu libero faucibus mattis faucibus augue molestie. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Vivamus at semper velit. Sed ut metus odio. Vivamus vehicula leo est.</p>
+            
+            <p>Cras venenatis diam fermentum eros suscipit posuere. Donec vitae imperdiet leo. Quisque viverra pharetra augue, sed rhoncus ipsum consequat vitae. Ut nec magna mi. Integer eleifend vehicula quam venenatis luctus. Nulla et mattis sapien. In vitae nibh sapien. Pellentesque diam arcu, fermentum eu volutpat sit amet, ullamcorper quis ante.</p>
+        </div>
+        <div id="underlying-frame"></div>
+    </div>
+    <div id="selector">
+        <img id="goleft" src="images/left.png" />
+        <div>
+            <img id="blue" src="images/shot-blue.png" />
+            <img id="yellow" src="images/shot-yellow.png" />
+            <img id="red" src="images/shot-red.png" />
+        </div>
+        <img id="goright" src="images/right.png" />
+    </div>
+</body>
+</html>
