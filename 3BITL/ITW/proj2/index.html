@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="cs">
+
+<head>
+	<meta charset="iso-8599-2">
+	<title>Risc House</title>
+	<meta name="robots" content="index,follow">
+	<meta name="author" content="David Bolvansky">
+	<meta name="keywords" content="houses, flats">
+	<meta name="description" content="Risc House">
+	<meta http-equiv="x-ua-compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" type="text/css" href="proj2.css" />
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
+	<link href='https://fonts.googleapis.com/css?family=Calligraffitti' rel='stylesheet'>
+	<link rel="icon" type="image/png" href="img/rischouse.jpg" />
+	<script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+	<script src="proj2.js"></script>
+</head>
+
+<body>
+	<header>
+		<div id="navigation_bar_body">
+			<nav>
+				<ul class="navbar_menu">
+					<li class="navbar_menu_item current-menu-item"><a href="http://www.stud.fit.vutbr.cz/~xbolva00/"><div id="our_name">Risc House</div></a></li>
+					<li class="navbar_menu_item"><a href="domy.html">Rodinné domy</a></li>
+					<li class="navbar_menu_item"><a href="byty.html">Byty</a></li>
+					<li class="navbar_menu_item"><a href="sluzby.html">Služby</a></li>
+					<li class="navbar_menu_item"><a href="mapa.html">Mapa webu</a></li>
+				</ul>
+			</nav>
+			<div id="location">
+				<div id="location_icon"><i class="fa fa-info-circle" aria-hidden="true"></i></div>
+				<div class="location_table_body">
+					<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2605.6299855086822!2d16.594932815687446!3d49.22654397932527!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0xbfcf161b01a48b0d!2zVnlzb2vDqSB1xI1lbsOtIHRlY2huaWNrw6kgQnJubyAtIEZha3VsdGEgaW5mb3JtYcSNbsOtY2ggdGVjaG5vbG9nacOt!5e0!3m2!1scs!2scz!4v1520419475516"
+					 id="geo_map" allowfullscreen=""></iframe>
+				</div>
+			</div>
+		</div>
+	</header>
+	<div id="body_content">
+		<div id="background_image">
+			<div id="body_menu_body">
+				<div class="menu_block"><a href="domy.html" id="houses_text">
+					<img src="img/dom.jpg" alt="Domy">
+					<div class="left_part">
+						<h3>Rodinné domy</h3>
+						<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sagittis mi a mauris ornare ullamcorper. Proin in mattis risus.</p>
+						<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sagittis mi a mauris ornare ullamcorper. Proin in mattis risus.</p>
+						<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sagittis mi a mauris ornare ullamcorper. Proin in mattis risus.</p>
+					</div>
+				</a></div>
+				<div class="menu_block"><a href="domy.html" id="flats_text">
+					<img src="img/byty.jpg" alt="Byty">
+					<h3>Byty</h3>
+					<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sagittis mi a mauris ornare ullamcorper. Proin in mattis risus.</p>
+					<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sagittis mi a mauris ornare ullamcorper. Proin in mattis risus.</p>
+					<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sagittis mi a mauris ornare ullamcorper. Proin in mattis risus.</p>
+				</a></div>
+
+				<div id="info_body">
+					<div class="menu_block info_menu_rec">
+						<table>
+							<tr>
+								<th colspan="2"><i class="fa fa-calendar" aria-hidden="true"></i>Udalosti</th>
+							</tr>
+							<tr>
+								<td>5</td>
+								<td>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</td>
+							</tr>
+							<tr>
+								<td>9</td>
+								<td>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</td>
+							</tr>
+							<tr>
+								<td>16</td>
+								<td>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</td>
+							</tr>
+						</table>
+					</div>
+					<div class="menu_block info_menu_rec" id="news">
+						<h2><i class="fa fa-newspaper-o" aria-hidden="true"></i>Novinky</h2>
+						<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin in mattis risus. Vivamus lacinia condimentum nulla vel
+							vulputate.</p>
+						<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin in mattis risus. Vivamus lacinia condimentum nulla vel
+							vulputate.</p>
+						<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin in mattis risus. Vivamus lacinia condimentum nulla vel
+							vulputate.</p>
+					</div>
+					<div class="menu_block info_menu_rec" id="about_us">
+						<h2><i class="fa fa-info-circle" aria-hidden="true"></i>O nás</h2>
+						<div></div>
+						<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sagittis mi a mauris ornare ullamcorper.</p>
+						<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="footer">
+		<div id="footer_columns_body">
+			<a href="mapa.html#contactus" id="contact" class="menu_block info_menu_rec">
+				<h3><i class="fa fa-phone-square" aria-hidden="true"></i>Kontakt</h3>
+			</a>
+			<a href="mapa.html#review">
+				<div id="recommendation" class="menu_block info_menu_rec">
+					<h3><i class="fa fa-thumbs-up" aria-hidden="true"></i>Recenzie</h3>
+				</div>
+			</a>
+		</div>
+	</div>
+</body>
+
+</html>
