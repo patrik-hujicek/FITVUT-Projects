@@ -128,9 +128,21 @@ Cvicenia (16/16)
 
 1. projekt (13/20)
 
+2. projekt (27/30)
+
 Cvicenia (10/10)
 
 **IAN**
 
 1. projekt (20/20)
+
+2. projekt (19/20)
+
+3. projekt (19/20)
+
+**IBS**
+
+1. projekt (10/10)
+
+2. projekt + prezentacia (9/10)
 

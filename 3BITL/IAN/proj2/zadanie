@@ -1,0 +1,55 @@
+Na jistem systemu dochazelo k zaseknuti nejruznejsich prikazu
+souvisejicich se sitovanim (ethtool, dhclient, ip). Prikaz po spusteni
+v rozumnem case (v radu minut) nedobehl, ackoli standardne dobehne v
+ramci milisekund. Spravce systemu proto ziskal dump pameti z tohoto
+systemu (vmcore), ktery je soucasti zadani projektu. Naleznete jej na
+svych virtualkach v adresari /root/Projekt-V2.tgz. Soucasti balicku je
+vmcore, ale take binarni soubory kernelu stejne jako jeho zdrojove kody
+pro referenci.
+
+Vasim ukolem je zjistit:
+ - jak presne spravce systemu ziskal onen vmcore
+ - proc dochazelo k uvaznuti ruznych sitovych prikazu
+ - jak by bylo mozne toto chovani opravit
+
+Vase reseni by melo mit podobu textoveho souboru (ASCII prosim, cesky,
+slovensky nebo anglicky), ktery bude popisovat Vasi praci se souborem
+vmcore a zdokumentuje, jak jste prisli k odpovedim na vyse uvedene otazky. Vas
+postup by mel byt podrobny do te miry, ze by ctenar, znaly analyzy
+vmcore, mel byt schopen bez problemu Vasi praci zopakovat a overit
+vysledky, ke kterym jste dosli.
+
+Nejlepsi formou je vzdy uvest prikaz, ktery jste pouzili pro ziskani
+informaci, a relevantni cast vystupu prikazu. Pote popiste, co presne
+ve vystupu vidite a co jste se dozvedeli. Vhodne je pridat Vase
+komentare primo do vystupu prikazu.
+
+Navrh opravy by mel mit bud podobu patche, a nebo jasne identifikovat
+misto v kodu (zdrojovem ci disassembleru), ktere by bylo treba
+pozmenit, aby k podobnemu chovani nedochazelo.
+
+Priklad popisu funkce schedule():
+=================================
+crash> struct -xo task_struct | grep -i 830
+  [0x830] struct blk_plug *plug;
+
+crash> dis schedule
+0xffffffff83112a90 <schedule>:  nopl   0x0(%rax,%rax,1) [FTRACE NOP]
+0xffffffff83112a95 <schedule+5>:        push   %rbp
+0xffffffff83112a96 <schedule+6>:        mov    %gs:0x10e40,%rax
+  ^^ %rax == current task_struct
+
+... Zde se nemeni hodnota %rax ...
+0xffffffff83112ac0 <schedule+48>:       mov    0x830(%rax),%rdi
+   ^^^ %rdi == task_struct->plug
+...
+0xffffffff83112ad6 <schedule+70>:       mov    $0x1,%esi
+0xffffffff83112adb <schedule+75>:       callq  0xffffffff82d1c180
+<blk_flush_plug_list>
+
+crash> whatis blk_flush_plug_list
+void blk_flush_plug_list(struct blk_plug *, bool);
+
+Vidime tedy, ze schedule() vola blk_flush_plug_list(current->plug,
+true).
+

@@ -1,0 +1,281 @@
+Projekt: IAN proj2
+Autor: David Bolvansky
+Login: xbolva00
+
+Otvorim dump pamati
+    crash vmlinux vmcore
+
+Nastavim hex rezim
+    crash> set hex
+
+Nacitam debug symboly:
+    crash> mod -S modules
+
+Otvorim backtrace
+    crash> bt
+
+Vsimnem si miesto, kde doslo k padu:
+    exception RIP: sysrq_handle_crash+22
+    
+Urobim disassemble na mieste sysrq_handle_crash+22
+
+    crash> dis -l sysrq_handle_crash+22
+    /usr/src/debug/kernel-3.10.0-861.el7/linux-3.10.0-861.el7.PROJECT.v2.x86_64/drivers/tty/sysrq.c: 145
+    0xffffffff82e2ed16 <sysrq_handle_crash+22>:     movb   $0x1,0x0
+
+Otvorim sysrq.c na riadku 145
+    char *killer = NULL;
+    ....
+	*killer = 1;
+
+Doslo k dereferencii null pointra, pokus o zapis cisla 1 na adresu 0x0
+
+Kernel dump bol vytvoreny pomocou kdump
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+Otvorim log pre calltrace + info co sa udialo:
+
+crash> log
+    [  240.392760] INFO: task ethtool:10433 blocked for more than 120 seconds.
+    [  240.393180] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+    [  240.393597] ethtool         D ffff9a647594cf10     0 10433   9175 0x00000080
+    ...
+
+        Call Trace:
+    [  240.394473]  [<ffffffff831139d9>] schedule_preempt_disabled+0x29/0x70
+    [  240.394918]  [<ffffffff83111797>] __mutex_lock_slowpath+0xc7/0x1d0
+    [  240.395338]  [<ffffffff83110b7f>] mutex_lock+0x1f/0x2f
+    [  240.395782]  [<ffffffffc018b51c>] e1000_release_eeprom+0x6c/0xc0 [e1000]
+    [  240.396214]  [<ffffffffc018e475>] e1000_read_eeprom+0xc5/0x240 [e1000]
+    [  240.396648]  [<ffffffffc01931b9>] e1000_get_eeprom+0xe9/0x170 [e1000]
+    [  240.397093]  [<ffffffffc01930d0>] ? e1000_set_phy_loopback+0x2e0/0x2e0 [e1000]
+    [  240.397518]  [<ffffffff82ff3d4f>] ethtool_get_any_eeprom+0x10f/0x1b0
+    [  240.397987]  [<ffffffff82ff5762>] dev_ethtool+0x1112/0x15c0
+    [  240.398441]  [<ffffffff82ba335e>] ? lru_cache_add+0xe/0x10
+    [  240.398912]  [<ffffffff82bd2058>] ? page_add_new_anon_rmap+0xb8/0x170
+    [  240.399375]  [<ffffffff82bc556d>] ? handle_pte_fault+0x56d/0xc30
+    [  240.399843]  [<ffffffff82fe6e39>] ? dev_get_by_name_rcu+0x69/0x90
+    [  240.400305]  [<ffffffff83006bdf>] dev_ioctl+0x1cf/0x590
+    [  240.400790]  [<ffffffff82fca4bd>] sock_do_ioctl+0x4d/0x60
+    [  240.401257]  [<ffffffff82fca6c8>] sock_ioctl+0x1f8/0x2d0
+    [  240.401747]  [<ffffffff82c2fb90>] do_vfs_ioctl+0x350/0x560
+    [  240.402243]  [<ffffffff82cd82bf>] ? file_has_perm+0x9f/0xb0
+    [  240.402724]  [<ffffffff82c2fe41>] SyS_ioctl+0xa1/0xc0
+
+Sietove nastroje (ethtool, dhclient, ip) boli blokovane po dobu viac ako 120 sekund. Kazdy tento proces skoncil v schedule_preemt_disabled.
+
+Vidim, ze doslo k locku mutexu, ale uz k unlocku nie. Pozriem sa na miesto, odkial prislo volanie mutex_lock.
+
+crash> dis -lr e1000_release_eeprom+0x6c
+    ....
+    /usr/src/debug/kernel-3.10.0-861.el7/linux-3.10.0-861.el7.PROJECT.v2.x86_64/drivers/net/ethernet/intel/e1000/e1000_hw.c: 3831
+    0xffffffffc018b4d3 <e1000_release_eeprom+0x23>: cmpb   $0x0,0x139aa(%rip)        # 0xffffffffc019ee84 <nested_mutex>
+    0xffffffffc018b4da <e1000_release_eeprom+0x2a>: jne    0xffffffffc018b510 <e1000_release_eeprom+0x60>
+    /usr/src/debug/kernel-3.10.0-861.el7/linux-3.10.0-861.el7.PROJECT.v2.x86_64/drivers/net/ethernet/intel/e1000/e1000_hw.c: 3835
+    0xffffffffc018b4dc <e1000_release_eeprom+0x2c>: cmpl   $0x4,0x18(%rbx)
+    0xffffffffc018b4e0 <e1000_release_eeprom+0x30>: jbe    0xffffffffc018b4ed <e1000_release_eeprom+0x3d>
+    /usr/src/debug/kernel-3.10.0-861.el7/linux-3.10.0-861.el7.PROJECT.v2.x86_64/drivers/net/ethernet/intel/e1000/e1000_hw.c: 3836
+    0xffffffffc018b4e2 <e1000_release_eeprom+0x32>: and    $0xffffffbf,%r12d
+    /usr/src/debug/kernel-3.10.0-861.el7/linux-3.10.0-861.el7.PROJECT.v2.x86_64/drivers/net/ethernet/intel/e1000/e1000_hw.c: 3837
+    0xffffffffc018b4e6 <e1000_release_eeprom+0x36>: mov    (%rbx),%rax
+    /usr/src/debug/kernel-3.10.0-861.el7/linux-3.10.0-861.el7.PROJECT.v2.x86_64/arch/x86/include/asm/io.h: 63
+    0xffffffffc018b4e9 <e1000_release_eeprom+0x39>: mov    %r12d,0x10(%rax)
+    /usr/src/debug/kernel-3.10.0-861.el7/linux-3.10.0-861.el7.PROJECT.v2.x86_64/drivers/net/ethernet/intel/e1000/e1000_hw.c: 3840
+    0xffffffffc018b4ed <e1000_release_eeprom+0x3d>: cmpb   $0x0,0x13990(%rip)        # 0xffffffffc019ee84 <nested_mutex>
+    0xffffffffc018b4f4 <e1000_release_eeprom+0x44>: je     0xffffffffc018b502 <e1000_release_eeprom+0x52>                   
+    /usr/src/debug/kernel-3.10.0-861.el7/linux-3.10.0-861.el7.PROJECT.v2.x86_64/drivers/net/ethernet/intel/e1000/e1000_hw.c: 3841
+    0xffffffffc018b4f6 <e1000_release_eeprom+0x46>: mov    $0xffffffffc019d180,%rdi
+    0xffffffffc018b4fd <e1000_release_eeprom+0x4d>: callq  0xffffffff83110b00 <mutex_unlock>
+    /usr/src/debug/kernel-3.10.0-861.el7/linux-3.10.0-861.el7.PROJECT.v2.x86_64/drivers/net/ethernet/intel/e1000/e1000_hw.c: 3842
+    0xffffffffc018b502 <e1000_release_eeprom+0x52>: pop    %rbx
+    0xffffffffc018b503 <e1000_release_eeprom+0x53>: pop    %r12
+    0xffffffffc018b505 <e1000_release_eeprom+0x55>: pop    %rbp
+    0xffffffffc018b506 <e1000_release_eeprom+0x56>: retq   
+    0xffffffffc018b507 <e1000_release_eeprom+0x57>: nopw   0x0(%rax,%rax,1)
+    /usr/src/debug/kernel-3.10.0-861.el7/linux-3.10.0-861.el7.PROJECT.v2.x86_64/drivers/net/ethernet/intel/e1000/e1000_hw.c: 3832
+    0xffffffffc018b510 <e1000_release_eeprom+0x60>: mov    $0xffffffffc019d180,%rdi
+    0xffffffffc018b517 <e1000_release_eeprom+0x67>: callq  0xffffffff83110b60 <mutex_lock>
+    0xffffffffc018b51c <e1000_release_eeprom+0x6c>: jmp    0xffffffffc018b4dc <e1000_release_eeprom+0x2c>
+
+Zobrazim si informacie o mutex_lock funkcii.
+crash> whatis mutex_lock
+    void mutex_lock(struct mutex *);
+
+Volanie mutex_lock nastalo tu:
+    0xffffffffc018b510 <e1000_release_eeprom+0x60>: mov    $0xffffffffc019d180,%rdi      <---- jediny argument funkcie (podla konvencie prvy argument je v rdi)
+    0xffffffffc018b517 <e1000_release_eeprom+0x67>: callq  0xffffffff83110b60 <mutex_lock>
+
+Taktiez vidime, odkial sa sem skocilo:
+    0xffffffffc018b4d3 <e1000_release_eeprom+0x23>: cmpb   $0x0,0x139aa(%rip)        # 0xffffffffc019ee84 <nested_mutex>
+    0xffffffffc018b4da <e1000_release_eeprom+0x2a>: jne    0xffffffffc018b510 <e1000_release_eeprom+0x60>  < ------ podmienka if (nested_mutex) skok na  0x60
+
+Rekonstrukcia kodu:
+if (nested_mutex)
+    mutex_lock(...);
+
+
+Pozrieme sa na zdrojak funkcie e1000_release_eeprom v e1000_hw.c: 
+    ....
+    if(nested_mutex)                                                       
+        mutex_lock(&e1000_eeprom_lock);                                    
+
+    /* Stop requesting EEPROM access */                                    
+    if (hw->mac_type > e1000_82544) {                                      
+        eecd &= ~E1000_EECD_REQ;                                           
+        ew32(EECD, eecd);                                                  
+    }                                                                      
+
+    if(nested_mutex)                                                       
+        mutex_unlock(&e1000_eeprom_lock);
+
+Vidime ze, ze ci dojde k zamknutiu mutexu, o tom rozhodnuje hodnota nested_mutex. Pozriem sa na porovnanie:
+        0xffffffffc018b4d3 <e1000_release_eeprom+0x23>: cmpb   $0x0,0x139aa(%rip)        # 0xffffffffc019ee84 <nested_mutex>
+
+Podla adresy vidim ze ide o globalnu premennu. V zdrojaku e1000_hw.c je ako: extern u8 nested_mutex;, skutocna definicia je v e1000_ethtool.c. Ziskam si jej hodnotu:
+crash> rd -8 0xffffffffc019ee84
+ffffffffc019ee84:  01
+
+Takze viem preco sa volal mutex_lock, nested_mutex bol nastaveny na 1. Vyhladam v zdrojakoch, kde sa nastavuje hodnota nested_mutex. Najdem ho v e1000_ethtool.c.
+
+static int e1000_get_eeprom(struct net_device *netdev, struct ethtool_eeprom *eeprom, u8 *bytes)  {                                                                               
+    struct e1000_adapter *adapter = netdev_priv(netdev);                        
+    ....
+    nested_mutex = *bytes; <---- priradi sa sem hodnota, ktora lezi na adrese "bytes", ten ukazovatel je predany v argumentoch funkcie.
+
+Podla calltrace:
+    ...
+    [  240.396648]  [<ffffffffc01931b9>] e1000_get_eeprom+0xe9/0x170 [e1000]
+    [  240.397093]  [<ffffffffc01930d0>] ? e1000_set_phy_loopback+0x2e0/0x2e0 [e1000]
+    [  240.397518]  [<ffffffff82ff3d4f>] ethtool_get_any_eeprom+0x10f/0x1b0
+    ...
+
+Vidim ze ethtool_get_any_eeprom volala funkciu e1000_get_eeprom. Zobrazim si zdrojaky tejto funkcie a pozriem, co sa ukazatel sa dostava do tohto argumentu "bytes"
+crash> sym  ethtool_get_any_eeprom
+ffffffff82ff3c40 (t) ethtool_get_any_eeprom /usr/src/debug/kernel-3.10.0-861.el7/linux-3.10.0-861.el7.PROJECT.v2.x86_64/net/core/ethtool.c: 1530
+
+static int ethtool_get_any_eeprom(struct net_device *dev, void __user *useraddr,  int (*getter)(struct net_device struct ethtool_eeprom *, u8 *), u32 total_len{                                                                                                                                                                         
+    .....                                                                                                                                
+    if (!data)                                                                                                                                                            
+    return -ENOMEM;                                                                                                                                                   
+    *data = !strcmp("eth1", dev->name) ? 1 : 0;                                                                                                                           
+
+    bytes_remaining = eeprom.len;                                                                                                                                         
+     while (bytes_remaining > 0) {                                                                                                                                         
+        eeprom.len = min(bytes_remaining, ret = getter(dev, &eeprom, data);
+    ...
+}
+
+getter je ukazatel prave na funkciu e1000_get_eeprom. 
+
+Vidime, ze skumany argument, je "data". Par riadkov nadtym sa na adresu "data" zapise 1 alebo 0 podla toho, ci dev->name je "eth1"  -----> *data = !strcmp("eth1", dev->name) ? 1 : 0; 
+
+Ak ide o rozhranie "eth1", *data nadobudne hodnotu 1.
+Kedze data == bytes, potom ked sa do nested_mutexu priradoval *bytes, tak sa priradila don 1. Podmienka platila, a nasledne kvoli tomu doslo k zamknutiu mutexu.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Dalsia vec je vsak, ze preco doslo k locku, ale unlock sa uz neurobil. Znova sa pozrieme e1000_release_eeprom, kde sa podmienene zamykal mutex.
+crash> dis -lr e1000_release_eeprom+0x6c
+    ....
+    0xffffffffc018b510 <e1000_release_eeprom+0x60>: mov    $0xffffffffc019d180,%rdi  <-------------- e1000_eeprom_lock
+    0xffffffffc018b517 <e1000_release_eeprom+0x67>: callq  0xffffffff83110b60 <mutex_lock>
+
+Vidim ze mutex (e1000_eeprom_lock), ktory sa zamyka je globalna premenna na adrese 0xffffffffc019d180. Poziem sa nan, aky ma typ atd..
+    DEFINE_MUTEX(e1000_eeprom_lock);
+    #define DEFINE_MUTEX(mutexname) \
+	    struct mutex mutexname = __MUTEX_INITIALIZER(mutexname)
+
+    crash> struct mutex 0xffffffffc019d180 
+        struct mutex {
+          count = {
+            counter = 0xffffffff
+          }, 
+        ...
+
+Vidim ze v counteri je -1, cize mohlo dojst k dvojitemu zamknutiu mutexu.
+
+Preskumame calltrace:
+    [  240.395782]  [<ffffffffc018b51c>] e1000_release_eeprom+0x6c/0xc0 [e1000]
+    [  240.396214]  [<ffffffffc018e475>] e1000_read_eeprom+0xc5/0x240 [e1000]
+    [  240.396648]  [<ffffffffc01931b9>] e1000_get_eeprom+0xe9/0x170 [e1000]
+
+s32 e1000_read_eeprom(struct e1000_hw *hw, u16 offset, u16 words, u16 *data)    
+    s32 ret;                                                                    
+
+    mutex_lock(&e1000_eeprom_lock);     <------- mutex sa zamyka, citac ide z 1 na 0                                        
+    ret = e1000_do_read_eeprom(hw, offset, words, data);                        
+    mutex_unlock(&e1000_eeprom_lock);                                       
+    return ret;                                                                 
+} 
+
+Po mutex_lock sa volala funkcia e1000_do_read_eeprom:
+static s32 e1000_do_read_eeprom(struct e1000_hw *hw, u16 offset, u16 words, u16 *data) {
+    ....
+    /* End this read operation */                                                                                                                                         
+    e1000_release_eeprom(hw);                                                                                                                                             
+    return E1000_SUCCESS; 
+}
+
+Kedze uz vieme, ze ak ak pri rozhrani "eth1" je nested_mutex nastaveny na 1, v podmienke znova dochadza k zamknutiu uz zamknuteho mutexu.
+    if(nested_mutex)                                                       
+        mutex_lock(&e1000_eeprom_lock);   <------ mutex sa znova zamyka, citac ide z 0 na -1 
+
+Co sa deje pri zamykani zamku? Pozriem sa do zdrojakov internej rutiny __mutex_lock_slowpath, ktoru volana funkcia "mutex_lock".
+crash> sym __mutex_lock_slowpath
+ffffffff831116d0 (t) __mutex_lock_slowpath /usr/src/debug/kernel-3.10.0-861.el7/linux-3.10.0-861.el7.PROJECT.v2.x86_64/kernel/mutex.c: 771
+
+static __used noinline void __sched _mutex_lock_slowpath(atomic_t *lock_count) {
+    struct mutex *lock = container_of(lock_count, struct mutex, count);
+    __mutex_lock_common(lock, TASK_UNINTERRUPTIBLE, 0, NULL, _RET_IP_, NULL);
+}
+
+#define MUTEX_SHOW_NO_WAITER(mutex) (atomic_read(&(mutex)->count) >= 0)
+
+static __always_inline int __sched __mutex_lock_common(struct mutex *lock, long state, unsigned int subclass, 
+    struct lockdep_map *nest_lock, unsigned long ip, struct ww_acquire_ctx *ww_ctx) { 
+    ....
+    if (MUTEX_SHOW_NO_WAITER(lock) && (atomic_xchg(&lock->count, 0) == 1)) <--- neskace sa nikde, v citaci je -1                                                                                        
+        goto skip_wait;                                                                                                                                                   
+
+    ....                                                         
+
+    for (;;) {  <------ ide sa do cyklu                                                                                                                                                         
+        if (MUTEX_SHOW_NO_WAITER(lock) && (atomic_xchg(&lock->count, -1) == 1))                                                                                                                         
+            break;    <--- cyklus sa neskonci, v citaci je stale -1 
+
+        ...
+        /* didn't get the lock, go to sleep: */                                                                                                                           
+        spin_unlock_mutex(&lock->wait_lock, flags);                                                                                                                       
+        schedule_preempt_disabled();                <---- Prejde sa do spanku                                                                                                       
+        spin_lock_mutex(&lock->wait_lock, flags); 
+    }
+
+}
+
+Nie je mozne stale zobrat lock, dochadza k prechodu do spanku.
+ 
+Patch:
+--- drivers/net/ethernet/intel/e1000/e1000_hw.c	2018-04-05 10:21:32.000000000 +0200
++++ e1000_hw.c	2018-04-21 15:58:42.869615719 +0200
+@@ -3829,7 +3829,4 @@
+ 	}
+ 
+-	if(nested_mutex)
+-		mutex_lock(&e1000_eeprom_lock);
+-
+ 	/* Stop requesting EEPROM access */
+ 	if (hw->mac_type > e1000_82544) {
+@@ -3837,7 +3834,4 @@
+ 		ew32(EECD, eecd);
+ 	}
+-
+-	if(nested_mutex)
+-		mutex_unlock(&e1000_eeprom_lock);
+ }
+
+
+Vmomentalnom stave nested_mutex nema ziadne dalsie pouzitia, okrem toho vo vyssie uvedenej funkcii e1000_release_eeprom, tak tuto premennu je mozne vymazat.
+Vymazat je teda aj mozne s nou suvisiaci riadok net/core/ethtool.c:1552: *data = !strcmp("eth1", dev->name) ? 1 : 0; 
+
+

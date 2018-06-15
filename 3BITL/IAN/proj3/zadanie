@@ -1,0 +1,32 @@
+Na jistem systemu dochazelo k pravidelnym padum zpusobujicim kernel panic. Na
+prvni pohled spolu jednotlive panicy nesouvisely, presto se jedna o stale stejny
+system se stejnym software. Spravce systemu proto ziskal dva ruzne dumpy pameti
+z tohoto systemu (vmcores), ktere jsou soucasti zadani projektu. Naleznete je na
+svych virtualkach v souboru /root/project3.tar.xz. Soucasti balicku jsou 2
+vmcores, ale take binarni soubory kernelu stejne jako jeho zdrojove kody pro
+referenci.
+
+Vasim ukolem je zjistit a popsat:
+ - k jakym problemum dochazelo
+ - co mohlo tento typ problemu zpusobit
+ - pokusit se identifikovat data, u kterych k tomuto problemu dochazelo
+ - pokud mozno tez identifikovat kod, kde k tomuto problemu dochazi
+
+V pripade, ze se Vam nepodari nalezt kod, ktery problem zpusobi, meli byste
+alespon jasne popsat, co tento kod zrejme dela a o jaky druh chyby se jedna.
+V takovem pripade se zamerte na data, ktera problem zpusobuji, a pokuste se
+ziskat co nejvice informaci o techto datech. Dukladna znalost dat by Vam mela
+poskytnout dostatek indicii k nalezeni, nebo alespon identifikovani, chybneho
+kodu.
+
+Vase reseni by melo mit podobu textoveho souboru (ASCII prosim, cesky,
+slovensky nebo anglicky), ktery bude popisovat Vasi praci se souborem
+vmcore a zdokumentuje, jak jste prisli k odpovedim na vyse uvedene otazky. Vas
+postup by mel byt podrobny do te miry, ze by ctenar, znaly analyzy
+vmcore, mel byt schopen bez problemu Vasi praci zopakovat a overit
+vysledky, ke kterym jste dosli.
+
+Nejlepsi formou je vzdy uvest prikaz, ktery jste pouzili pro ziskani
+informaci, a relevantni cast vystupu prikazu. Pote popiste, co presne
+ve vystupu vidite a co jste se dozvedeli. Vhodne je pridat Vase
+komentare primo do vystupu prikazu.

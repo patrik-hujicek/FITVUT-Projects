@@ -1,0 +1,348 @@
+Projekt: IAN proj3
+Autor: David Bolvansky
+Login: xbolva00
+
+Analyza vmcore1:
+
+crash> set hex
+crash> mod -S
+crash> log
+
+Podla casovych razitkoch budem prechadzat varovania a pady od tych najstarsich po najnovsie
+
+1. varovanie
+[   59.407180] WARNING: CPU: 3 PID: 1559 at lib/list_debug.c:29 __list_add+0x65/0xc0
+[   59.407198] list_add corruption. next->prev should be prev (ffff8e66f8df3ca0), but was ffff8e66724072d0. (next=ffff8e66724072d0).
+
+2. varovanie
+[   59.407782] WARNING: CPU: 3 PID: 1559 at lib/list_debug.c:36 __list_add+0x8a/0xc0
+[   59.407799] list_add double add: new=ffff8e66724072d0, prev=ffff8e66f8df3ca0, next=ffff8e66724072d0.
+
+
+Calltrace k nemu:
+...
+[   59.407586]  [<ffffffff93d682d5>] __list_add+0x65/0xc0
+[   59.407599]  [<ffffffff93c35808>] d_alloc+0x58/0x70
+[   59.407612]  [<ffffffff93c9542c>] proc_fill_cache+0xfc/0x180
+....
+
+3. varovanie (panic)
+kernel BUG at fs/dcache.c:1645!
+
+
+Pad systemu u vmcore1: [   59.460041] RIP  [<ffffffff93c33cd9>] d_instantiate+0x69/0x70
+
+------------------------------------------------------------------------------------------------------------------------
+
+Preskumam prve a druhe varovanie tykajuci sa problemu pri list_add.
+
+V list_debug.c je v kerneli implementovany linked list. Z calltracu je jasne, ze funkcia d_alloc volala funkciu
+na pridanie polozky do linked listu.
+
+crash> sym d_alloc
+ffffffff93c357b0 (T) d_alloc /usr/src/debug/kernel-3.10.0-862.el7.cda_project_3/linux-3.10.0-862.el7.cda_project_3.x86_64/fs/dcache.c: 1516
+
+|struct dentry *d_alloc(struct dentry * parent, const struct qstr *name)  {                                                                               
+    struct dentry *dentry = __d_alloc(parent->d_sb, name);                      
+    if (!dentry)                                                                
+        return NULL;                                                            
+                                                                               
+    dentry->d_flags |= DCACHE_RCUACCESS;                                        
+    spin_lock(&parent->d_lock);                                                 
+                                                                       
+    __dget_dlock(parent);                                                       
+    dentry->d_parent = parent;                                                  
+    list_add(&dentry->d_u.d_child, &parent->d_subdirs);                         
+    spin_unlock(&parent->d_lock);                                                                                                                           
+    return dentry;                                                              
+}
+
+list_add je v include/linux/list.h
+static inline void list_add(struct list_head *new, struct list_head *head) {                                                                               
+    __list_add(new, head, head->next);                                          
+}
+
+Varovanie hovori, ze "&dentry->d_u.d_child" uz v zozname bola, a doslo k chybe opatovneho pridavania. &dentry->d_u.d_child je rovnaky pointer ako (&parent->d_subdirs)->next
+
+------------------------------------------------------------------------------------------------------------------------
+
+Druhe varovanie
+
+Preskumam co sa stalo na d_set_d_op+0xec
+
+crash> dis -l d_set_d_op+0xec -r | tail -n 10
+0xffffffff93c3283d <d_set_d_op+0xbd>:	callq  0xffffffff93a91800 <warn_slowpath_null>
+0xffffffff93c32842 <d_set_d_op+0xc2>:	movb   $0x1,0xae33bd(%rip)        # 0xffffffff94715c06
+0xffffffff93c32849 <d_set_d_op+0xc9>:	jmpq   0xffffffff93c327a5 <d_set_d_op+0x25>
+/usr/src/debug/kernel-3.10.0-862.el7.cda_project_3/linux-3.10.0-862.el7.cda_project_3.x86_64/fs/dcache.c: 1558
+0xffffffff93c3284e <d_set_d_op+0xce>:	cmpb   $0x0,0xae33b2(%rip)        # 0xffffffff94715c07
+0xffffffff93c32855 <d_set_d_op+0xd5>:	jne    0xffffffff93c3279d <d_set_d_op+0x1d>
+0xffffffff93c3285b <d_set_d_op+0xdb>:	mov    $0x616,%esi
+0xffffffff93c32860 <d_set_d_op+0xe0>:	mov    $0xffffffff9447c6cc,%rdi
+0xffffffff93c32867 <d_set_d_op+0xe7>:	callq  0xffffffff93a91800 <warn_slowpath_null>
+0xffffffff93c3286c <d_set_d_op+0xec>:	movb   $0x1,0xae3394(%rip)        # 0xffffffff94715c07
+
+Patricne miesto v zdrojakoch:
+     WARN_ON_ONCE(dentry->d_op);  
+
+Popis tohto makra: WARN_ON_ONCE macro will test a condition and complain if that condition evaluates true - but only once per boot.
+
+V nasom pripade teda kod ocakaval, ze v dentry->d_op bude null pointer, no bola tam nejaka adresa a preto sa podmienka nevyhodnotila ako false. Bola true, co spustilo varovanie.
+
+
+------------------------------------------------------------------------------------------------------------------------
+Tretie varovanie
+z logu som uz nasiel ze "kernel BUG at fs/dcache.c:1645!"
+
+void d_instantiate(struct dentry *entry, struct inode * inode) {
+    BUG_ON(!hlist_unhashed(&entry->d_alias));  <---- kernel bug tu, d_alias dentry polozky bol unhashed                             
+    if (inode)
+        spin_lock(&inode->i_lock);
+        __d_instantiate(entry, inode);
+    if (inode)      
+        spin_unlock(&inode->i_lock);    
+    security_d_instantiate(entry, inode);                                       
+}       
+
+Ziskame obsah entry ako prveho argumentu. Prvy argument bude zachovany v RDI.
+Z logu: RDI: ffff8e6672407240
+
+crash> struct dentry ffff8e6672407240
+
+struct dentry {
+  d_flags = 0x400002c, 
+  d_seq = {
+    sequence = 0x2
+  }, 
+  d_hash = {
+    next = 0x0, 
+    pprev = 0x0
+  }, 
+  d_parent = 0xffff8e6672407240, 
+  d_name = {
+    {
+      {
+        hash = 0x0, 
+        len = 0xd
+      }, 
+      hash_len = 0xd00000000
+    }, 
+    name = 0xffff8e6672407278 "drm mm object"
+  }, 
+  d_inode = 0xffff8e66795e85a8, 
+  d_iname = "drm mm object\000Í+\337\016i\231\373l\256Iwly\033\373<", 
+  .....
+}
+
+Vidime poskodeny obsah dentry. len nesuhlasi so skutocnou dlzkou name. Taktiez chyba hash a hash_len je teda 0.
+
+------------------------------------------------------------------------------------------------------------------------
+
+Analyza vmcore2:
+
+crash> set hex
+crash> mod -S
+crash> log
+
+Problem: [  193.098114] BUG: unable to handle kernel NULL pointer dereference at 000000000000000c
+Miesto: RIP  [<ffffffff856259a1>] lookup_real+0x11/0x60
+
+crash> sym lookup_real
+ffffffff85625990 (t) lookup_real /usr/src/debug/kernel-3.10.0-862.el7.cda_project_3/linux-3.10.0-862.el7.cda_project_3.x86_64/fs/namei.c: 1366
+
+crash> whatis lookup_real
+struct dentry *lookup_real(struct inode *, struct dentry *, unsigned int);
+
+
+crash> dis -lr lookup_real+0x11
+/usr/src/debug/kernel-3.10.0-862.el7.cda_project_3/linux-3.10.0-862.el7.cda_project_3.x86_64/fs/namei.c: 1366
+0xffffffff85625990 <lookup_real>:       nopl   0x0(%rax,%rax,1) [FTRACE NOP]
+0xffffffff85625995 <lookup_real+5>:     push   %rbp
+0xffffffff85625996 <lookup_real+6>:     mov    %rsp,%rbp
+0xffffffff85625999 <lookup_real+9>:     push   %rbx
+0xffffffff8562599a <lookup_real+10>:    mov    %rsi,%rbx
+0xffffffff8562599d <lookup_real+13>:    sub    $0x8,%rsp
+/usr/src/debug/kernel-3.10.0-862.el7.cda_project_3/linux-3.10.0-862.el7.cda_project_3.x86_64/fs/namei.c: 1370
+0xffffffff856259a1 <lookup_real+17>:    testb  $0x10,0xc(%rdi)     // dereferencia(rdi + 0xc)
+
+
+Dochadza k *(prvyarg + 0xc). No kedze zo problemu vieme ze doslo k dereferencii na 000000000000000c, je jasne ze prvy argument funkcie bol null pointer.
+
+Cast calltrace z logu:
+
+[  193.098628] Call Trace:
+[  193.098648]  [<ffffffff856263c2>] __lookup_hash+0x42/0x60
+[  193.098663]  [<ffffffff85b0ac17>] lookup_slow+0x42/0xa7
+[  193.098677]  [<ffffffff8562a248>] path_lookupat+0x838/0x8b0
+
+__lookup_hash volana nasu funkciu s prvym argumentom ako NULL.
+
+crash> sym __lookup_hash
+ffffffff85626380 (t) __lookup_hash /usr/src/debug/kernel-3.10.0-862.el7.cda_project_3/linux-3.10.0-862.el7.cda_project_3.x86_64/fs/namei.c: 1385
+
+crash> dis -lr __lookup_hash+0x42 | tail -n 10
+/usr/src/debug/kernel-3.10.0-862.el7.cda_project_3/linux-3.10.0-862.el7.cda_project_3.x86_64/fs/namei.c: 1390
+0xffffffff856263ad <__lookup_hash+0x2d>:	cmpb   $0x0,-0x19(%rbp)
+0xffffffff856263b1 <__lookup_hash+0x31>:	je     0xffffffff856263c2 <__lookup_hash+0x42>
+/usr/src/debug/kernel-3.10.0-862.el7.cda_project_3/linux-3.10.0-862.el7.cda_project_3.x86_64/fs/namei.c: 1393
+0xffffffff856263b3 <__lookup_hash+0x33>:	mov    0x30(%r12),%rdi
+0xffffffff856263b8 <__lookup_hash+0x38>:	mov    %ebx,%edx
+0xffffffff856263ba <__lookup_hash+0x3a>:	mov    %rax,%rsi
+0xffffffff856263bd <__lookup_hash+0x3d>:	callq  0xffffffff85625990 <lookup_real>
+/usr/src/debug/kernel-3.10.0-862.el7.cda_project_3/linux-3.10.0-862.el7.cda_project_3.x86_64/fs/namei.c: 1394
+0xffffffff856263c2 <__lookup_hash+0x42>:	mov    -0x18(%rbp),%rdx
+
+
+static struct dentry *__lookup_hash(struct qstr *name, struct dentry *base, unsigned int flags)  {   
+    bool need_lookup;
+    struct dentry *dentry;                                                      
+    
+    dentry = lookup_dcache(name, base, flags, &need_lookup); 
+    if (!need_lookup)        // do tejto vetvy sa neskocilo            
+        return dentry;                                                         
+    return lookup_real(base->d_inode /* dentry inode je  NULL */ , dentry, flags);     // toto sa podla calltrace vykonalo                      
+}
+
+static struct dentry *lookup_hash(struct nameidata *nd)                                                                                                                   
+    return __lookup_hash(&nd->last, nd->path.dentry, nd->flags);                                                                                                          
+} 
+
+Vidime, ze lookup_dcache musela nastavit need_lookup na true, kedze neprebehol return ale zato doslo k volaniu funkcie lookup_real.
+V lookup_dcache sa podla mena hlada polozka v dentry cache. 
+
+Miesto kde sa nastavuje need_lookup na true v funkcii lookup_dcache:
+
+static struct dentry *lookup_dcache(struct qstr *name, struct dentry *dir,
+                    unsigned int flags, bool *need_lookup)
+{
+    struct dentry *dentry;
+    int error;
+
+    *need_lookup = false;
+    dentry = d_lookup(dir, name); // polozka sa nenasla, dentry bolo NULL.
+    if (dentry) { // neprebehlo, vid vysvetlenie dalej
+        if (dentry->d_flags & DCACHE_OP_REVALIDATE) {
+            error = d_revalidate(dentry, flags);
+            if (unlikely(error <= 0)) {
+                if (error < 0) {
+                    dput(dentry);
+                    return ERR_PTR(error);
+                } else if (!d_invalidate(dentry)) {
+                    dput(dentry);
+                    dentry = NULL;
+                }
+            }
+        }
+    }
+
+    if (!dentry) { // tato vetva prebehla cela, lebo need_lookup sa muselo nastavit na true, cize dentry bolo NULL.
+        dentry = d_alloc(dir, name);
+        if (unlikely(!dentry))
+            return ERR_PTR(-ENOMEM);
+
+        *need_lookup = true;
+    }
+    return dentry;
+}
+
+Vidime ze dentry vznikaju pomocou d_alloc funkcie.
+crash> sym d_alloc
+ffffffff856357b0 (T) d_alloc /usr/src/debug/kernel-3.10.0-862.el7.cda_project_3/linux-3.10.0-862.el7.cda_project_3.x86_64/fs/dcache.c: 1516
+
+(Uz vo vmcore1 bol problem (vid 1. varovanie) s double add, kde volanie list_add prebiehalo prave v tejto funkcii)  
+
+d_alloc interne vola __d_alloc(parent->d_sb, name), ktora alokuje dentry polozku.
+
+Zaujimave casti:
+ dentry = kmem_cache_alloc(dentry_cache, GFP_KERNEL);  // alokacia dentry v dentry cache
+
+if (((long)dentry & 0xffff) == (((long)dentry >> 16) & 0xffff))       <------ zvlastna podmienka v skratke overujuca ci niektore casti dentry polozky sa rovnaju, ak ano, tak sa dentry uvolni     
+    kmem_cache_free(dentry_cache, dentry);  
+  
+Problem je, ze aj ked sa dentry uvolni, nehladiac na zmyselnost podmienky, s dentry sa nasledne pracuje na dalsi riadkoch a dokonca je vratena ako navratova hodnota funkcie. 
+
+Mozne problemy
+1. Zla podmienka
+2. Chybajuci return za kmem_cache_free v ramci true vetvy podmienky.
+
+------------------------------------------------------------------------------------------------------------------------
+
+Vseobecna analyza:
+V oboch vmcore vznikol po pouziti nastroja find.
+
+crash> log  // vmcore2
+[  193.098429] task: ffff891276795ee0 ti: ffff891377760000 task.ti: ffff891377760000
+
+crash> struct task ffff891276795ee0
+ comm = "find\000)\000\000\060\000\000\000\000\000\000", // co je "find .", t.j. find nad rootom
+ 
+
+Po analyze oboch vmcore je zrejme, ze spolocnym problemom su poskodene dentry polozky v dentry cache.
+
+U vmcore1
+crash> files
+PID: 1559   TASK: ffff8e6675d80fd0  CPU: 6   COMMAND: "find"
+ROOT: /    CWD: /root
+ FD       FILE            DENTRY           INODE       TYPE PATH
+  0 ffff8e65f5800000 ffff8e667ad70d80 ffff8e66f8f90de0 CHR  /dev/pts/0
+  1 ffff8e65f5800000 ffff8e667ad70d80 ffff8e66f8f90de0 CHR  /dev/pts/0
+  2 ffff8e65f5800000 ffff8e667ad70d80 ffff8e66f8f90de0 CHR  /dev/pts/0
+  3 ffff8e65f6127800 ffff8e667ac34a80 ffff8e65f695ae60 DIR  /root
+  4 ffff8e667a5e4f00 ffff8e66fac08180 ffff8e66fac30040 DIR  /proc/
+  5 ffff8e667a5e4f00 ffff8e66fac08180 ffff8e66fac30040 DIR  /proc/
+  6 ffff8e667a5e5000 ffff8e66f8df3c00 ffff8e65f6846420 DIR  /proc/31
+  7 ffff8e667a5e5000 ffff8e66f8df3c00 ffff8e65f6846420 DIR  /proc/31
+
+Zistene zdvojenie poloziek. Podobny problem je vidno aj u vmcore2:
+crash> files
+PID: 1679   TASK: ffff891276795ee0  CPU: 1   COMMAND: "find"
+ROOT: /    CWD: /root
+ FD       FILE            DENTRY           INODE       TYPE PATH
+  0 ffff8913783ed200 ffff8912761e4540 ffff8912f9dd39d0 CHR  /dev/pts/0
+  1 ffff8913783ed200 ffff8912761e4540 ffff8912f9dd39d0 CHR  /dev/pts/0
+  2 ffff8913783ed200 ffff8912761e4540 ffff8912f9dd39d0 CHR  /dev/pts/0
+  3 ffff8912f6745d00 ffff8912f9c3a840 ffff891276312e60 DIR  /root
+  4 ffff8912f649f200 ffff8912f180e240 ffff8912e80d7d20 DIR  /usr/src/kernels/3.10.0-861.el7.x86_64/include/config/x86
+  5 ffff891375ee4100 ffff891374d6c000 ffff891374c875a0 DIR  /usr/src/kernels/3.10.0-861.el7.x86_64/include/config
+  7 ffff8912f649f200 ffff8912f180e240 ffff8912e80d7d20 DIR  /usr/src/kernels/3.10.0-861.el7.x86_64/include/config/x86
+  8 ffff891375819700 ffff8912f180f180 0000000000000000 ?    ?               // dentry inode je NULL, vid analyza vmcore2
+
+
+Kedze zistene problemy sa viazu k dentry a dentry cache, je potrebne analyzovat ako sa alokuje polozka v dentry cache - kmem_cache_alloc(dentry_cache, GFP_KERNEL);
+
+------------------------------------------------------------------------------------------------------------------------
+
+Nasledovna analyza prebehla s vmcore2
+
+Polozka sa alokuje v dentry_cache co je deklarovane ako:
+static struct kmem_cache *dentry_cache __read_mostly;
+
+Preskumam kde a ako sa vlastne dentry_cache vytvara:
+ dentry_cache = KMEM_CACHE(dentry, SLAB_RECLAIM_ACCOUNT|SLAB_PANIC|SLAB_MEM_SPREAD); // toto makro sa nachadza v include/linux/slab.h
+
+#define KMEM_CACHE(__struct, __flags) kmem_cache_create(#__struct,\
+    SLAB_DEBUG_OBJECTS               |        sizeof(struct __struct), __alignof__(struct __struct),\
+    SLAB_NOLEAKTRACE                 |        (__flags), NULL)
+
+#__struct znamena ze sa argument makra skonvertuje na string, v nasom pripade, kedze sa vola KMEM_CACHE(dentry, ....) tak funkcia kmem_cache_create sa vola nasledovne:
+kmem_cache_create("dentry", ...)
+
+Pozriem sa na tuto funkciu:
+crash> sym kmem_cache_create
+ffffffff855b9400 (T) kmem_cache_create /usr/src/debug/kernel-3.10.0-862.el7.cda_project_3/linux-3.10.0-862.el7.cda_project_3.x86_64/mm/slab_common.c: 304
+
+Vidime ze sa placuje so SLAB alokaciou. Pomocou kmem ziskam informacie o slaboch, zameriam sa na "dentry"
+
+crash> kmem -s
+....
+ffff89137b160c00 inode_cache              584      12466     13419    497    16k
+kmem: dentry: slab: ffffdf3a42c603c0 invalid freepointer: 80                            <------ najdeny problem suvisiaci s dentry cache
+ffff89137b160b00 dentry                   192      68366     69972   3332     4k
+....
+
+U vmcore1 to iste, t.j:
+....
+ffff8e66fb160c00 inode_cache              584      12963     13176    488    16k
+kmem: dentry: slab: fffff5d442c901c0 invalid freepointer: 20400002c
+ffff8e66fb160b00 dentry                   192      24657     25641   1221     4k
+....
