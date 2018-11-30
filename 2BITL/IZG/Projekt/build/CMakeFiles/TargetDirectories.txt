@@ -1,3 +1,0 @@
-/home/xbolva00/Plocha/IZG/izg1617/build/CMakeFiles/rebuild_cache.dir
-/home/xbolva00/Plocha/IZG/izg1617/build/CMakeFiles/edit_cache.dir
-/home/xbolva00/Plocha/IZG/izg1617/build/CMakeFiles/izgProjekt2016.dir
