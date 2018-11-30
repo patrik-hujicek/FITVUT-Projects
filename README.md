@@ -1,6 +1,6 @@
 # Projekty na FIT VUT
 
-## Prvy rocnik
+## Prvy rocnik BIT
 
 #### Zimny semester
 
@@ -49,7 +49,7 @@ Pristupovy terminal (20/20)
 1. projekt - Testovanie softveru (20/20)
 2. projekt - Kalkulacka (44/50)
 
-## Druhy rocnik
+## Druhy rocnik BIT
 
 #### Zimny semester
 
@@ -94,7 +94,7 @@ Cvicenia (18/18)
 
 Projekt - Vykreslovaci retazec a programovanie shaderov (18/18)
 
-## Treti rocnik
+## Treti rocnik BIT
 
 #### Zimny semester
 
@@ -146,3 +146,24 @@ Cvicenia (10/10)
 
 2. projekt + prezentacia (9/10)
 
+## Prvy rocnik BIT
+
+#### Zimny semester
+
+**TIN**
+
+1. domaca uloha (5/5)
+
+2. domaca uloha (?/5)
+
+3. domaca uloha (?/5)
+
+**BIS**
+
+1. projekt (?/15)
+
+**ACH**
+
+1. projekt (?/10)
+
+2. projekt (?/15)
