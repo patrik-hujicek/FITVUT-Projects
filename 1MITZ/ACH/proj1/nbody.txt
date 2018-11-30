@@ -1,0 +1,133 @@
+Architektura procesorů (ACH 2018)
+Projekt č. 1 (nbody)
+Login: xbolva00
+
+U každého kroku proveďte měření simulace (1500 částic, 750 kroků) a to na čas simulace, vektorový i skalární výkon,
+počet výpadku v cache (alespoň L1 a L2). Dále odpovězte na požadované otázky.
+
+
+Krok 0: základní implementace
+=============================
+Celkový čas [s]:                        63.76       
+Výkon skalárních operací [MFLOPS]:      1355.94
+Výkon vektorových operací [MFLOPS]:     1276.51
+L1 miss [%]:                            1.5921
+L2 miss [%]:                            0.000602
+L3 miss [%]:                            44.2
+
+Které PAPI_EVENTS jste použili pro získání počtu výpadků v paměti?
+HW countery pro L1: PAPI_L1_DCM|PAPI_LD_INS|PAPI_SR_INS
+HW countery pro L2: PAPI_L2_DCM|PAPI_L2_DCA
+HW countery pro L3: PAPI_L3_TCM|PAPI_L3_TCA
+
+
+Krok 1: vektorizovaná implementace
+===================================
+Celkový čas [s]:                        17.46
+Výkon skalárních operací [MFLOPS]:      111.744
+Výkon vektorových operací [MFLOPS]:     7444.15
+L1 miss [%]:                            2.4653
+L2 miss [%]:                            0.0232
+L3 miss [%]:                            32.9
+
+Jaké pragmy bylo potřeba přidat?
+#pragma omp simd
+#pragma omp declare simd
+
+Které dovětky k pragmám jste použili a jaky měly vliv na kompilátorem generované funkce? (velocity.optrpt)
+dovetky linear, uniform u declare simd
+- dovetky umoznili generovat efektivnejsu SIMD verziu funkcie
+- report prekladaca hlasi nove scattery a gathery
+
+dovetky informuju o:
+- p2 ma invariantnu hodnotu pocas vsetkych iteracii cyklu
+- p1 a vel maju linearny vztah k iteracii cyklu
+
+Krok 2: přístupy do paměti
+=============================
+Celkový čas [s]:                        25
+Výkon skalárních operací [MFLOPS]:      94.6708
+Výkon vektorových operací [MFLOPS]:     5182.52
+L1 miss [%]:                            1.5454
+L2 miss [%]:                            0.000432
+L3 miss [%]:                            16.3
+
+
+Jak jste zarovnali data v paměti a informovali překladač?
+Zarovna pomocou __declspec(align(64)).
+Informoval pomocou __assume_aligned(64).
+
+Měla tato úprava vliv na výpadky? Na výkon? Proč?
+Pocet vypadkov v L1 sa znizil, kedze su data ulozene v súvislých blokoch a su zarovnane v pamati.
+Zaroven sa vsak znizil vykon vektorovych operacii, co viedlo k celkovemu znizeniu vykonu a zvyseniu behu vypoctov.
+Kvoli volaniu funkcie s parametrom typu t_particle je nutne v kazdej iteracii vytvorit novy objekt typu t_particle,
+co nie je idealne z pohladu efektivnosti kodu.
+
+Krok 3: režie funkcí
+===================================
+3.1: spojení funkcí
+-----------------------------------
+Celkový čas [s]:                        22.99
+Výkon skalárních operací [MFLOPS]:      22.4646
+Výkon vektorových operací [MFLOPS]:     3129.29
+L1 miss [%]:                            1.9163
+L2 miss [%]:                            0.00113
+L3 miss [%]:                            58.9
+
+3.2: úprava rozhraní
+-----------------------------------
+Celkový čas [s]:                        10.94
+Výkon skalárních operací [MFLOPS]:      27.9573
+Výkon vektorových operací [MFLOPS]:     6566.16
+L1 miss [%]:                            5.14892
+L2 miss [%]:                            0.000511
+L3 miss [%]:                            47.3
+
+3.3: bez volání funkce
+-----------------------------------
+Celkový čas [s]:                        5.32
+Výkon skalárních operací [MFLOPS]:      61.5207
+Výkon vektorových operací [MFLOPS]:     14274
+L1 miss [%]:                            18.8527
+L2 miss [%]:                            0.00039
+L3 miss [%]:                            15.3
+
+Která verze je nejefektivnější a proč?
+Posledna (3.3) verzia. Nedochadza k rezii suvisiacej s volanim funkcie.
+
+Krok 4: úprava složitosti výpočtu
+===================================
+Vypočtěte kolik částic se teoreticky vejde do paměti cache procesoru.
+(Velikost cache můžete zjistit příkazem 'lscpu'.) 
+L1d cache:             32K
+L1i cache:             32K
+L2 cache:              256K
+L3 cache:              20480K
+
+Uvazujme, ze castica = sizeof(t_particle) = 7x floatov = 28 B
+
+Maximální počet částic v L1: 32 * 1024 / 32 = 1170
+Maximální počet částic v L2: 256 * 1024 / 32 = 9362
+Maximální počet částic v L3: 20480 * 1024 / 32 = 748982
+
+
+Vyplňte následující tabulku tak, aby demonstrovala běh s a bez výpadků v L1 a L2 cache. Zvolte vhodné hodnoty počtu částic N (Budou nižši než teoretické limity vypočteny dříve):
+
+N       L1 miss [%]  L2 miss [%]  L3 miss [%]  výkon [MFLOPS]   čas [s]
+400       0.00162      4.73         8.01           15610         0.28
+800       3.31        0.0228        76.8           15038.8       1.17
+1 000     4.64        0.00085       52.6           16147.3       1.7
+1 200     6.68        0.00048       4.86           18683.8       2.91
+1 400     6.68        0.00037       6.87           18798.9       2.89
+2 000     9.01        0.00742       6.74           18777.6       5.92
+8 000     13.38        2.87       0.00262          22790.2       78.81
+9 000     13.40        3.07       0.00176          22932.6       99.15
+9 500     13.36        4.72       0.00073          22727.4       119.7
+10 000    13.43        4.38       0.00247          23013.5       121.9
+
+Popište, jaký dopad na výkon mají výpadky v~cache.
+Vyssi pocet vypadkov z cache sposobuje znizenie vykonu a dlhsi cas samotnych vypoctov, a to kvoli rezii suvisiacej s pristupmi do pomalej hlavnej pamati pri vypadku.
+
+Jak byste tento vliv omezili?
+Prednacitanim dat, cache blockingom
+

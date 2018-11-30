@@ -1,0 +1,112 @@
+\documentclass[]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[slovak]{babel}
+\usepackage[hidelinks]{hyperref}
+\usepackage{graphicx}
+\usepackage{framed}
+
+\begin{document}
+
+\begin{titlepage}
+	\begin{center}
+		\textsc{{\LARGE Vysoké učení technické v~Brně\\[0.3em]
+				Fakulta informačních technologií}}\\
+		\vspace{\stretch{0.382}}
+		{\Huge \textbf{Mystery of BIS}\\[0.5em]Dokumentácia k projektu}
+		\vspace{\stretch{0.618}}
+	\end{center}
+
+	{\noindent \large Dávid Bolvanský\hfill \today}
+\end{titlepage}
+
+\section*{Zmapovanie siete}
+Po prihlásení na BIS server som zistil aktuálne sieťové nastavenie pomocou príkazu \texttt{ifconfig}. Následne som túto sieť zmapoval pomocou nástroja \texttt{nmap} a odhalil štyri servery (\uv{ostrovy}), na ktorých sú umiestnené tajomstvá použitím príkazu \texttt{nmap -sP 192.168.122.29/24 | grep "ptest"}.
+
+\begin{framed}
+\noindent Nmap scan report for ptest3.bis.mil (192.168.122.22)\\
+Nmap scan report for ptest2.bis.mil (192.168.122.27)\\
+Nmap scan report for ptest1.bis.mil (192.168.122.143)\\
+Nmap scan report for ptest4.bis.mil (192.168.122.210)
+\end{framed}
+
+\noindent Pomocou nástroja \texttt{nmap} som taktiež zistil, aké služby na dotyčných serveroch bežia:
+
+\begin{framed}
+\noindent Nmap scan report for ptest1 (192.168.122.143)\\\\
+PORT   STATE SERVICE\\
+21/tcp open  ftp\\
+22/tcp open  ssh\\
+
+\noindent Nmap scan report for ptest2 (192.168.122.27)\\\\
+PORT     STATE SERVICE\\
+22/tcp   open  ssh\\
+80/tcp   open  http\\
+3306/tcp open  mysql\\
+
+\noindent Nmap scan report for ptest3 (192.168.122.22)\\\\
+PORT    STATE SERVICE\\
+22/tcp  open  ssh\\
+80/tcp  open  http\\
+111/tcp open  rpcbind\\
+
+\noindent Nmap scan report for ptest4 (192.168.122.210)\\\\
+PORT     STATE SERVICE\\
+22/tcp   open  ssh\\
+53/tcp   open  domain\\
+6667/tcp open  irc
+\end{framed}
+
+\section*{Tajomstvo A}
+Na BIS serveri som preskúmal zaujímave súbory a našiel pár dokumentov (pdf, doc) a v koši (\texttt{.Trash}) kľúč \texttt{itcrowd.key}. Obsah dokumentov som preskúmal a v \texttt{tc48-2008-024-Rev4.pdf} som našiel URI \-- \texttt{jbarber@ptest1.bis.mil}. Pomocou SSH som sa teda pokúsil o pripojenie ako \texttt{jbarber} na server \texttt{ptest1}. Server požadoval heslo. Na internete som si našiel zoznam najčastejších hesiel a vyskúšal som ich, až pokým nenastal úspech a pripojil som sa na server \texttt{ptest1} s heslom \textit{welcome}. Po prieskume súborov na tom serveri som v \texttt{/etc/shadow} našiel tajomstvo A.
+
+\section*{Tajomstvo B}
+Keď som prechádzal súbory na serveri \texttt{ptest3}, preskúmal som aj priečinok \texttt{.ssh} a našiel som v nom súbor \texttt{config}, z ktorého obsahu vyplývalo, že ako užívateľ \texttt{webmaster} sa môžem pripojiť na server \texttt{ptest2}. To som aj urobil pomocou \texttt{ssh webmaster@ptest2} a úspešne som sa pripojil na tento server. Nasledoval klasický prieskum servera. Dostal som do \texttt{/var/www/html/}, kde ma zaujal súbor \texttt{internal-memo.php}, ktorý som preskúmal. Našiel som zaujímavú časť kódu, ktorá žiaľ bola v nedostupnej vetve kódu:
+
+\begin{framed}
+\noindent echo \$GLOBALS['INTERNAL\_MSG'];
+\end{framed}
+
+Zdá sa, že text v \texttt{INTERNAL\_MSG} bude obsahovať niečo interné/tajné a mojím cieľom je sa k tomu nejakým spôsobom dostať. Skúmal som ďalej a v súbore \texttt{index.php} som našiel ďalšiu zaujímavú časť kódu:
+
+\begin{framed}
+\noindent if (isset(\$\_GET['debug\_variable'])) \{\\
+\indent var\_dump(\$\{\$\_GET['debug\_variable']\});\\
+\};
+\end{framed}
+
+Využil som tento ladiací (\textit{debug}) kód, ktorý sa dostal aj do produkčného (\textit{release}) kódu na získanie ďalšieho tajomstva. Kód slúži na výpis (\textit{dump}) premennej, ktorá je určená obsahom \texttt{debug\_variable}. Vďaku tomuto ladiacemu kódu som sa teda vedel ľahko dostať k obsahu \texttt{INTERNAL\_MSG}. Do terminálu som zadal príkaz \texttt{curl http://ptest2/index.php?debug\_variable=INTERNAL\_MSG} a získal som tajomstvo B. 
+
+\section*{Tajomstvo C}
+Ako som už zmienil pri tajomstve A, na BIS serveri som našiel kľúč \texttt{itcrowd.key}, s ktorým som skúsil pripojiť na nejaký zo štyroch serverov. S týmto kľúčom a užívateľským menom \texttt{itcrowd} som sa úspešne pripojil na server \texttt{ptest3}. Preskúmal som na tom serveri rôzne priečinky a našiel som zaujímave veci vo \texttt{/var/www/html/}. Našiel som tu súbor \texttt{secret.txt}, ktorý síce nešiel otvoriť pomocou nástroja \texttt{cat}, no pomocou príkazu \texttt{curl http://ptest3/secret.txt} som odhalil tajomstvo C.
+
+\section*{Tajomstvo D}
+Zo zmapovania siete som vedel, že na serveri \texttt{ptest4} beží DNS server (port 53). Skúšal som sa pýtať práve tohto servera nejaké DNS dotazy. Pomocou \texttt{dig @ptest4.bis.mil ptest4.bis.mil SOA} som zistil autoritatívny server \-- \texttt{bis.mil}. O tomto serveri som chcel zistiť ďalšie informácie, tak som si vypísal všetky DNS záznamy pre tento server pomocou \texttt{dig @ptest4.bis.mil bis.mil ANY}. V TXT zázname som našiel tajomstvo D.
+
+\section*{Tajomstvo E}
+Po prihlásení na server \texttt{ptest3} ma uvítala správa, ktorá nedávala moc zmysel. Napadlo ma, že by to mohlo o Ceasarovu šifru s posunutím, ktoré však už s prvého pohľadu nemohlo byť 3. Pomocou online stránky na internete som dekódoval túto správu a zistil som jej obsah a že sa jedná o posun o 23 znakov. Časť správy obsahovala nasledovný text: \textit{To claim your prize run command: riddle rope}. Zadal som teda príkaz \texttt{riddle rope} do terminálu a získal som tajomstvo E.
+
+\section*{Tajomstvo F}
+Zo zmapovania siete som vedel, že na serveri \texttt{ptest4} beží IRC server. Na BIS serveri sa nachádzal IRC klient \texttt{irssi}, ktorý som spustil a pomocou príkazu \texttt{\textbackslash connect ptest4} som sa naň pripojil. Následne som si pomocou príkazu \texttt{\textbackslash list} zobrazil všetky IRC kanály. Pripojil som sa kanál s zaujímavým menom \-- \texttt{\#bis}. 
+
+Spoločnosť mi tu robil IRC bot \texttt{Willie}. IRC boti reagujú na príkazy a následne vykonávajú nejakú činnosť, preto ma zaujímalo, čo tento bot vie. Pomocou príkazu \texttt{.commands} som zistil zoznam príkazov, na ktoré bot reaguje. Medzi príkazmi bol aj jeden, ktorý sa odlišoval na prvý pohľad od ostatných \-- príkaz \texttt{.CUKOO}. V chate s botom Willie som tento príkaz zadal a bot mi odhalil tajomstvo F.
+
+\section*{Tajomstvo G}
+Zo zmapovania siete som vedel, že na serveri \texttt{ptest1} beží FTP server. Pripojil som sa naň pomocou príkazu \texttt{ftp ptest1} z BIS servera. Zistil som, že na serveri beží \texttt{vsFTPd} vo verzii 2.3.4, na ktorú je možné použiť smajlíkový útok. Ako užívateľské meno som zadal reťazec zakončený smajlíkom (napr. \texttt{x:)}), heslo som nezadal žiadne. Následne sa mi otvoril port, na ktorý keď som sa pripojil, získal som tajomstvo G.
+
+\section*{Tajomstvo H}
+Tajomstvo H nebolo ďaleko od tajomstva A, na tom istom serveri (\texttt{ptest1}) som preskúmal domovský priečinok užívateľa \texttt{jbarber}. V priečinku \texttt{Mail} som si otvoril súbor \texttt{Trash} a našiel som tu tajomstvo H.
+
+\section*{Tajomstvo I}
+Po ďalšom hľadaní som hneď vedľa tajomstva C našiel v súbore \texttt{robots.txt} aj tajomstvo I.
+
+\section*{Tajomstvo J}
+Vedľa tajomstva B, konkrétne v priečinku \texttt{/var/www/html/libs/}, som našiel súbor \texttt{constants.php}, ktorý obsahoval prístupové údaje k databáze:
+
+\begin{framed}
+\noindent define('DB\_HOST\_USERNAME', 'arcturus');\\
+define('DB\_HOST\_PASSWORD', '16431879196842');\\
+define('DB\_DATABASE', 'arcturus');
+\end{framed} 
+
+S týmito údajmi som sa dostal do databáze pomocou príkazu \texttt{mysql -u arcturus -p16431879196842} a následne \texttt{use arcturus;}. Pomocou príkazu \texttt{show tables;} som si následne zobrazil všetky tabuľky. V tabuľkách \texttt{pages} a \texttt{tagline} som nič zaujímavé nenašiel, no v tabuľke \texttt{contracts} som našiel tajomstvo J.
+\end{document}

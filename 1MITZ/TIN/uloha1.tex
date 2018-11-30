@@ -1,0 +1,242 @@
+\documentclass[12pt]{article}
+
+\usepackage[margin=1in]{geometry} 
+\usepackage{amsmath,amsthm,amssymb,amsfonts}
+\usepackage[slovak]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{enumitem}
+\usepackage{mathtools}
+\usepackage{ifthen}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usepackage{caption}
+
+\usetikzlibrary{arrows,automata,calc,positioning}
+
+\newcommand{\task}[2]{\par \noindent \textbf{{#1}.} \hspace{3pt} #2 \vspace{10pt}}
+\newcommand{\solution}{\vspace{10pt}}
+\newcommand{\pipesep}{\hspace{3pt} \mid \hspace{3pt}}
+
+\newenvironment{subtasklist}[0]{\begin{enumerate}[label=(\alph*)]}{\end{enumerate}}
+\newenvironment{mysolution}[1]{
+    \par \textbf{Riešenie} \newline
+    \ifthenelse{\equal{#1}{subtasks}}{\begin{enumerate}[label=(\alph*)]}
+            {\begin{enumerate}[label={}] \item}
+}{\end{enumerate} \newpage}
+\newcommand{\subtask}{\item}
+
+
+ 
+\begin{document}
+ 
+\title{TIN úloha č. 1}
+\author{Dávid Bolvanský \\ \small\texttt{xbolva00}}
+\date{}
+\maketitle
+
+\task{1}{
+S využitím uzáverových vlastností dokážte alebo vyvráťte nasledujúce vzťahy:
+	\begin{enumerate}[label=(\alph*)]
+		\item{$L_1, L_2 \in \mathcal{L}_3 \Rightarrow L_1 \setminus L_2 \in \mathcal{L}_3$}
+		\item{$L_1 \in \mathcal{L}_3, L_2 \in \mathcal{L}_2^D \Rightarrow L_1 \setminus L_2 \in \mathcal{L}_2^D$}
+		\item{$L_1 \in \mathcal{L}_3, L_2 \in \mathcal{L}_2 \Rightarrow L_1 \setminus L_2 \in \mathcal{L}_2$}
+	\end{enumerate}
+	$\mathcal{L}_2^D$ značí triedu deterministických bezkontextových jazykov.
+}
+
+\begin{mysolution}{subtasks}
+\vspace{-15pt}
+\subtask % (a)
+$L_1 \setminus L_2$ je možné upraviť na ekvivalentný tvar obsahujúci operácie prienik a doplnok: $L_1 \cap \overline{L_2}$. Podľa vety 3.23\footnote{\label{opora}http://www.fit.vutbr.cz/study/courses/TIN/public/Texty/TIN-studijni-text.pdf}
+ trieda regulárnych jazykov tvorí množinovú Boolovu algebru. Z Boolovej algebry plynie mimo iné aj uzavretosť voči prieniku a doplnku. Ak $L_2 \in \mathcal{L}_3$, tak aj $\overline{L_2} \in \mathcal{L}_3$. Ďalej, ak teda platí $L_1 \in \mathcal{L}_3$,  $L_2 \in \mathcal{L}_3$, $\overline{L_2} \in \mathcal{L}_3$, potom platí aj $L_1 \cap \overline{L_2}$, resp. $L_1 \setminus L_2 \in \mathcal{L}_3$.
+\\
+Zadaný vzťah platí.
+
+\subtask % (b)
+Veta 4.27\textsuperscript{\ref{opora}} hovorí o tom, že deterministické bezkontextové jazyky sú uzavrené voči prieniku s regulárnymi jazykmi a doplnku. $L_1 \setminus L_2$ je možné prepísať na tvar $L_1 \cap \overline{L_2}$. Tento tvar obsahuje prienik s regulárnym jazykom a doplnok k bezkontextovému jazyku, o ktorých podľa vety 4.27 je známe, že sú uzavreté.\\
+Zadaný vzťah platí.
+
+\subtask % (c)
+Veta 4.24\textsuperscript{\ref{opora}} hovorí o tom, že bezkontextové jazyky nie sú uzavrené voči prieniku a doplnku. Keďže tvar $L_1 \cap \overline{L_2}$ obsahuje doplnok bezkontextového jazyka, je táto uzáverová vlastnosť porušená.\\
+Dôkaz sporom:\\
+Predpokladám, že zadaný vzťah platí. Nech $L_1$ a $L_2$ sú jazyky nad konečnou abecedou $\Sigma$. Za $L_1$ si zvolím jazyk $\Sigma^{*}$, ktorý je regulárny a je teda možné vytvoriť KA, ktorý tento jazyk prijíma (veta 3.8\textsuperscript{\ref{opora}}). Po dosadení do pravej strany vzťahu sa získa $\Sigma^{*} \setminus L_2$. Tento výraz vyjadruje doplnok jazyka $L_2$. Keďže doplnok BKJ nie je uzavretý podľa vety 4.24, potom nemusí platiť $\overline{L_2} \in \mathcal{L}_2$ a teda ani $L_1 \setminus L_2 \in \mathcal{L}_2$.
+\\
+Zadaný vzťah neplatí.
+\end{mysolution}
+
+\task{2}{Nech $\Sigma = \{0 ,1 ,2\}}$. Uvažujme jazyk $L$ nad abecedou $\Sigma \cup \{\#\}$ definovaný následovne:\\
+$L = \{w_1\#w_2 \pipesep w_1, w_2 \in \Sigma^*, \#_{1}(w_1) + (2 * \#_{2}(w_1)) = \#_{1}(w_2) + (2 * \#_{2}(w_2))\}$.\\
+Zostrojte deterministický zásobníkový automat $M_L$ taký, že $L(M_L) = L$.\\   
+
+\begin{mysolution}
+	
+$M_L = (\{q_0 ,q_1, q_2, q_3\}, \{0 ,1 ,2, \#\}, \{1, z_0\}, \delta, q_0, z_0, \{q_3\})$\\
+
+Prechodová funkcia $\delta$ je definovaná nasledovne:
+\begin{align*}
+\delta(q_0, 0, z_0) &= \{(q_0, z_0)\} &
+\delta(q_0, 1, z_0) &= \{(q_0, 1z_0)\} &
+\delta(q_0, 2, z_0) &= \{(q_0, 11z_0)\} \\
+\delta(q_0, \#, z_0) &= \{(q_1, z_0)\} &
+\delta(q_0, 0, 1) &= \{(q_0, 1)\} &
+\delta(q_0, 1, 1) &= \{(q_0, 11)\} \\
+\delta(q_0, 2, 1) &= \{(q_0, 111)\} &
+\delta(q_0, \#, 1) &= \{(q_1, 1)\} &
+\delta(q_1, 0, 1) &= \{(q_1, 1)\} \\
+\delta(q_1, 1, 1) &= \{(q_1, \varepsilon)\} &
+\delta(q_1, 2, 1) &= \{(q_2, \varepsilon)\} &
+\delta(q_1, \varepsilon, z_0) &= \{(q_3, z_0)\}  \\
+\delta(q_2, \varepsilon, 1) &= \{(q_1, \varepsilon)\} &
+\delta(q_3, 0, z_0) &= \{(q_3, z_0)\} &
+\end{align*}
+
+\end{mysolution}
+
+
+\task{3}{
+	Dokážte, že jazyk $L$ z predchádzajúceho príkladu nie je regulárny.
+}
+
+\begin{mysolution}
+\noindent Predpokladajme, že jazyk $L$ je regulárny jazyk. Potom podľa vety 3.17\textsuperscript{\ref{opora}} o Pumping lemme platí:
+\begin{gather*}
+\exists k > 0: \forall w \in L:
+\vert w \vert \ge k \Rightarrow
+\exists x,y,z \in \Sigma^{*}: \\
+\ w = xyz\ \land 
+\ y \ne \varepsilon\ \land 
+\vert xy \vert \le k\ \land 
+\forall m \ge 0 : xy^{m}z \in L
+\end{gather*}
+
+Vyberiem si reťazec $w$:
+\\
+$w = 1^{k}\#1^{k}, w \in L \\
+\vert w \vert = 2k+1 \ge k$
+
+$x, y, z$ si vyberiem nasledovne: \\
+$x = 1^{l} \hspace{22mm} l \geq 0 \\
+y = 1^{m} \hspace{20mm} m > 0 \\
+z = 1^{k - m - l}\#1^{k} \hspace{6mm} l + m \leq  k \\
+$
+
+Iterácia $m = 0$: 
+\\
+$xy^{0}z = 1^{l}(1^{m})^{0}1^{k - m -l}\#1^{k} = 1^{k - m}\#1^{k}$\\
+\\
+Ale $1^{k - m}\#1^{k} \notin L$ \-- došlo k sporu. Predpoklad, že jazyk $L$ je regulárny, neplatí. Jazyk $L$ nie je regulárny.
+\end{mysolution}
+
+\task{4}{
+	Nech $G_P = (N, \Sigma, P, S)$ je pravá lineárna gramatika. Navrhnite a formálne popíšte algoritmus, ktorý pre zadanú pravú lineárnu gramatiku $G_P = (N, \Sigma, P, S)$ vytvorí ľavú lineárnu gramatiku $G_L$ takú, že $L(G_P) = L(G_L)$. \\
+	\\
+	Algoritmus demonštrujte na gramatike $G = (\{S, A, B\}, \{a, b\}, P, S)$ s nasledujúcimi pravidlami:
+\begin{gather*}
+	S \rightarrow abA \mid bS\\
+	A  \rightarrow bB \mid S \mid ab\\
+	B  \rightarrow \varepsilon \mid aA
+\end{gather*}
+}
+
+\begin{mysolution}
+\noindent 
+
+\textbf{Vstup:} pravá lineárna gramatika $G_P = (N, \Sigma, P, S)$\\
+\textbf{Výstup:} ľavá lineárna gramatika $G_L = (N^{'}, \Sigma^{'}, P^{'}, S^{'})$ taká, že $L(G_P) = L(G_L)$\\
+\textbf{Metóda:}\\
+1. $N^{'} = N \cup  \{S^{'}\}, S^{'} \notin N$\\
+2. $\Sigma^{'} =  \Sigma$ \\
+% \noindent 3. Množinu pravidiel $P^{'}$ definujeme takto:
+%\begin{itemize}
+%	\item $\forall (A \rightarrow xB) \in P \land A, B \in N, x \in \Sigma^{*}: \exists (B %\rightarrow Ax) \in P^{'}$
+%	\item $\forall (A \rightarrow x) \in P \land A \in N, x \in \Sigma^{*}: \exists(S^{'} %\rightarrow Ax) \in P^{'}$
+%	\item $\exists (S \rightarrow \varepsilon) \in P^{'}$
+%\end{itemize}
+3. $P^{'} =$
+\begin{gather*}
+	\{B \rightarrow Ax \mid (A \rightarrow xB) \in P \land A, B \in N \land x \in \Sigma^{*}\}\\
+	\cup \\
+	\{S^{'} \rightarrow Ax \mid (A \rightarrow x) \in P \land A \in N \land x \in \Sigma^{*}\}\\
+	 \cup \\
+	\{S \rightarrow \varepsilon\}
+\end{gather*}
+
+4. $S^{'}$ je štartovací symbol v $G_L$\\
+
+\newpage 
+Demonštrácia algoritmu na zadanej gramatike $G$:\\
+1. $N^{'} = N \cup  \{S^{'}\} $\\
+2. $\Sigma^{'} =  \Sigma$ \\
+3. Aplikovanie bodu 3 vytvoreného algoritmu spôsobí nasledovné transformácie:
+\begin{table}[h]
+	\begin{center}
+		\begin{tabular}{|l|l|}
+			\hline
+			pravidlo v $P$& pravidlo v $P^{'}$ \\
+			\hline
+			$S \rightarrow abA$ & $A \rightarrow Sab$  \\
+			\hline
+			$S \rightarrow bS$ & $S \rightarrow Sb$  \\
+			\hline
+			$A \rightarrow bB$ & $B \rightarrow Ab$  \\
+			$A \rightarrow S$ & $S \rightarrow A$  \\
+			\hline
+			$A \rightarrow ab$ & $S^{'} \rightarrow Aab$  \\
+			\hline
+			$B \rightarrow \varepsilon$ & $S^{'} \rightarrow B$  \\
+			\hline
+			$B \rightarrow aA$ & $A \rightarrow Ba$  \\
+			\hline
+			 & $S \rightarrow \varepsilon$  \\
+			\hline
+		\end{tabular}
+	\end{center}
+\end{table}
+
+Množina pravidiel $P^{'}$ obsahuje nasledovné pravidlá:
+\begin{gather*}
+S^{'} \rightarrow Aab \mid B\\
+S \rightarrow A \mid Sb \mid \varepsilon \\
+A  \rightarrow Sab \mid Ba\\
+B  \rightarrow Ab
+\end{gather*}
+
+Príklad derivácie pomocou pravidiel gramatík $G_P$ a $G_L$ na reťazec $ababb$:\\
+$S \xRightarrow[G_P]{} abA \xRightarrow[G_P]{} abS \xRightarrow[G_P]{} ababA \xRightarrow[G_P]{} ababbB \xRightarrow[G_P]{} ababb$
+
+$S^{'} \xRightarrow[G_L]{} B \xRightarrow[G_L]{} Ab \xRightarrow[G_L]{} Sabb \xRightarrow[G_L]{} Aabb \xRightarrow[G_L]{} Sababb \xRightarrow[G_L]{} ababb$
+
+\end{mysolution}
+
+\task{5}{
+	Dokážte, že jazyk $L = \{w \in \{a, b\}^{*} \mid \#_{a}(w) mod \ 3 \neq 0 \land \#_{a}(b) > 0\}$ je regulárny. Postupujte nasledovne:
+\begin{itemize}
+	\item Definujte $\sim_L$ pre jazyk $L$.
+	\item Zapíšte rozklad $\Sigma^{*} / \sim_L$ a určite počet tried tohto rozkladu.
+	\item Ukážte, že jazyk $L$ je zjednotením niektorých tried rozkladu $\Sigma^{*} / \sim_L$.
+\end{itemize}
+}
+
+\begin{mysolution}{subtasks}
+	\vspace{-15pt}
+	\subtask % (a)
+	$\forall u, v \in \Sigma^{*} : u \sim_L v \Leftrightarrow (\#_{a}(u) mod \ 3 = \#_{a}(v) mod \ 3) \land [(\#_{b}(u) = 0 \land \#_{b}(v) = 0) \lor (\#_{b}(u) > 0 \land \#_{b}(v) > 0)]$
+	
+	\subtask % (b)
+	$\Sigma^{*} / \sim_L$: \\
+	$L_1 = \{ w \in \{a, b\}^{*} \mid \#_{a}(w) mod \ 3 = 0 \land \#_{b}(w) = 0\} \\
+	L_2 = \{ w \in \{a, b\}^{*} \mid \#_{a}(w) mod \ 3 = 0 \land \#_{b}(w) > 0\} \\
+	L_3 = \{ w \in \{a, b\}^{*} \mid \#_{a}(w) mod \ 3 = 1 \land \#_{b}(w) = 0\} \\
+	L_4 = \{ w \in \{a, b\}^{*} \mid \#_{a}(w) mod \ 3 = 1 \land \#_{b}(w) > 0\} \\
+	L_5 = \{ w \in \{a, b\}^{*} \mid \#_{a}(w) mod \ 3 = 2 \land \#_{b}(w) = 0\} \\
+	L_6 = \{ w \in \{a, b\}^{*} \mid \#_{a}(w) mod \ 3 = 2 \land \#_{b}(w) > 0\}$
+	
+	Počet tried rozkladu je 6.
+	
+	\subtask % (b)
+	$L = L_4 \cup L_6$
+	
+	Relácia $\sim_L$ má konečný index (index = 6) a $L$ je zjednotením niektorých tried rozkladu ($L_4, L_6$). Podľa vety 3.20\textsuperscript{\ref{opora}} je potom ekvivalentným tvrdením, že jazyk $L$ je prijímaný DKA. Jazyk $L$ je regulárny jazyk.
+\end{mysolution}
+
+\end{document}
