@@ -1,0 +1,65 @@
+﻿Architektura procesorů (ACH 2018)
+Projekt č.2 (CUDA)
+Login: xbolva00
+
+
+Krok 0: základní implementace
+=============================
+vláken/blok    čas [s]
+32             33.70
+38             33.47
+50             16.93
+52             16.93
+64             16.99
+128            16.99
+256            16.91
+512            17.14
+1024           18.22
+
+Ideální počet vláken na blok:
+256 vlakien na blok
+
+Krok 1: optimalizace kódu
+=====================
+Došlo ke zrychlení?
+Ano, na cas priblizne 10.4 sekundy. (-6.51 sekund oproti kroku 0).
+
+Popište dva hlavní důvody:
+Optimalizacia vyrazov, menej redudantnych nacitani/vypoctov (pouziva sa 33 registrov),
+netreba synchronizovat vlakna pred zapisom do pamati vdaka p_in, p_out triku. 
+Tri kernely boli taktiez zlucene/inlinovane do jedneho.
+
+Porovnejte metriky s předchozím krokem:
+Zlepsenie metrik "Global Memory Load Efficiency", "Achieved Occupancy", "FLOP Efficiency".
+Vdaka optimalnejsiemu kodu aj menej vykonanych FP operacii.
+
+Krok 2: sdílená paměť
+=====================
+Došlo ke zrychlení?
+Ano, na cas priblizne 7.97 sekundy. (-2.43 sekundy oproti kroku 1).
+Zdůvodnete:
+Vdaka zdielanej pamati nie je potrebne vykonavat pomale pristupy do globalnej pamati.
+
+Porovnejte metriky s předchozím krokem:
+Znacne znizenie "Global Load Transactions".
+Zmena metriky "Shared Memory Efficiency" z 0 na 100%.
+Dalsie znacne zlepsenie metrik "Global Memory Load Efficiency" ako aj "FLOP Efficiency".
+
+Krok 3: analýza výkonu
+======================
+N        čas CPU [s]    čas GPU [s]    propustnost paměti [MB/s]    výkon [MFLOPS]    zrychlení [-]
+512      0.64           0.56           168.80                       17833.1             1.1x     
+1024     2.35           1.05           210.76                       39896.1             2.2x
+2048     7.34           2.02           280.38                       78952.4             3.6x
+4096     28.88          4.09           403.40                       106289.1            7.1x
+6144     64.5           6.08           531.20                       239125.5            10.6x
+8192     126.26         7.97           658.04                       320017.3            15.8x
+16394    600.95         16.98          1078.5                       610482.9            35.4x  
+131072   32464 (odhad)  1045.07        979.8                        overflow metriky    31.0x (odhad)
+
+Poznamka: Cas bol merany pre pocet krokov = 1000, priepustnost a vykon pre pocet krokov = 10.
+
+Od jakého počtu částic se vyplatí počítat na grafické kartě?
+Ak uvazujeme ze pararelna verzia na CPU je 10x rychlejsia, na GPU sa vyplati pocitat priblizne od 6000 castic.
+===================================
+
