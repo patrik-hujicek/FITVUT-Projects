@@ -160,14 +160,14 @@ Cvicenia (10/10)
 
 **BIS**
 
-1. projekt (?/15)
+Hľadanie tajomstiev (?/15)
 
 **AIS**
 
-1. projekt (31/34)
+Zubná ordinácia (31/34)
 
 **ACH**
 
-1. projekt (10/10)
+1. projekt - Optimilizacia sekvencneho kodu, vektorizacia (10/10)
 
-2. projekt (?/15)
+2. projekt - CUDA (15/15)
