@@ -146,12 +146,6 @@ Ale $1^{k - m}\#1^{k} \notin L$ \-- došlo k sporu. Predpoklad, že jazyk $L$ je
 \textbf{Metóda:}\\
 1. $N^{'} = N \cup  \{S^{'}\}, S^{'} \notin N$\\
 2. $\Sigma^{'} =  \Sigma$ \\
-% \noindent 3. Množinu pravidiel $P^{'}$ definujeme takto:
-%\begin{itemize}
-%	\item $\forall (A \rightarrow xB) \in P \land A, B \in N, x \in \Sigma^{*}: \exists (B %\rightarrow Ax) \in P^{'}$
-%	\item $\forall (A \rightarrow x) \in P \land A \in N, x \in \Sigma^{*}: \exists(S^{'} %\rightarrow Ax) \in P^{'}$
-%	\item $\exists (S \rightarrow \varepsilon) \in P^{'}$
-%\end{itemize}
 3. $P^{'} =$
 \begin{gather*}
 	\{B \rightarrow Ax \mid (A \rightarrow xB) \in P \land A, B \in N \land x \in \Sigma^{*}\}\\
