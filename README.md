@@ -154,7 +154,7 @@ Cvicenia (10/10)
 
 1. domaca uloha (5/5)
 
-2. domaca uloha (?/5)
+2. domaca uloha (4,3/5)
 
 3. domaca uloha (?/5)
 
@@ -164,9 +164,9 @@ Hľadanie tajomstiev (?/15)
 
 **AIS**
 
-Zubná ordinácia (31/34)
+Zubná ordinácia  -  Prvotna analyza a plan projektu (5/5), vysledne modely (26/29)
 
-**ACH**
+**ACH**1
 
 1. projekt - Optimilizacia sekvencneho kodu, vektorizacia (10/10)
 
