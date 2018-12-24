@@ -166,7 +166,7 @@ Hľadanie tajomstiev (?/15)
 
 Zubná ordinácia  -  Prvotna analyza a plan projektu (5/5), vysledne modely (26/29)
 
-**ACH**1
+**ACH**
 
 1. projekt - Optimilizacia sekvencneho kodu, vektorizacia (10/10)
 
