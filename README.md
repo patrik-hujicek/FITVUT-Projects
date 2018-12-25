@@ -146,7 +146,7 @@ Cvicenia (10/10)
 
 2. projekt + prezentacia (9/10)
 
-## Prvy rocnik BIT
+## Prvy rocnik MIT
 
 #### Zimny semester
 
