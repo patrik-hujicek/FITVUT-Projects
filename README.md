@@ -160,7 +160,7 @@ Cvicenia (10/10)
 
 **BIS**
 
-Hľadanie tajomstiev (?/15)
+Hľadanie tajomstiev (15/15)
 
 **AIS**
 
