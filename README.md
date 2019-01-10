@@ -156,7 +156,7 @@ Cvicenia (10/10)
 
 2. domaca uloha (4,3/5)
 
-3. domaca uloha (?/5)
+3. domaca uloha (5/5)
 
 **BIS**
 

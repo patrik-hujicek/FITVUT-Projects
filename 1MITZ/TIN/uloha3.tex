@@ -1,0 +1,183 @@
+\documentclass[12pt]{article}
+
+\usepackage[margin=1in]{geometry} 
+\usepackage{amsmath,amsthm,amssymb,amsfonts}
+\usepackage[slovak]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{enumitem}
+\usepackage{mathtools}
+\usepackage{ifthen}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usepackage{graphicx}
+\usepackage{caption}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+
+\usetikzlibrary{arrows,automata,calc,positioning}
+
+\newcommand{\task}[2]{\par \noindent \textbf{{#1}.} \hspace{3pt} #2 \vspace{5pt}}
+\newcommand{\solution}{\vspace{10pt}}
+\newcommand{\pipesep}{\hspace{3pt} \mid \hspace{3pt}}
+
+\newenvironment{subtasklist}[0]{\begin{enumerate}[label=(\alph*)]}{\end{enumerate}}
+\newenvironment{mysolution}[1]{
+    \par \textbf{Riešenie} \newline
+    \ifthenelse{\equal{#1}{subtasks}}{\begin{enumerate}[label=(\alph*)]}
+            {\begin{enumerate}[label={}] \item}
+}{\end{enumerate} \newpage}
+\newcommand{\subtask}{\item}
+
+
+ 
+\begin{document}
+ 
+\title{TIN úloha č. 3}
+\author{Dávid Bolvanský \\ \small\texttt{xbolva00}}
+\date{}
+% \maketitle
+
+\lhead{Dávid Bolvanský}
+\chead{TIN úloha č. 3}
+\rhead{xbolva00}
+
+\task{1}{
+}
+
+\begin{mysolution}{subtasks}
+\vspace{-15pt}
+\subtask % (a)
+Krokovaním stroja $M$ som zistil nasledovné: f(0) = 1, f(1) = 1, f(2) = 2, f(3) = 3, f(3) = 1, f(4) = 5, f(5) = 8, atď. Zrejme sa teda jedná o známu Fibonacciho postupnosť (bez člena 0). Výstupom funkcie $f$ pre vstup $n$ je hodnota $n+1$ -tého člena Fibonacciho postupnosti.
+
+Pásky TS $M$: Výpočet člena postupnosti prebieha tak, že obsah prvej pásky udáva poradie počítaného člena Fibonacciho postupnosti. Na druhej a tretej páske sa nachádzajú predchádzajúci členovia Fibonacciho postupnosti. Na štvrtej páske je vypočítaný člen Fibonacciho postupnosti.
+
+Činnosť TS $M$: TS vykonáva iterácie výpočtu, kde celkový počet iterácií je daný obsahom pásky 1. V každej iterácii sa deju nasledovné akcie: \uv{Ľavá časť} TS presúva predchádzajúceho člena z pásky 3 na pásku 2 a presúva posledného vypočítaného člena z pásky 4 na pásku 3. \uv{Pravá časť} TS počíta ďalšieho člena Fibonacciho postupnosti na páske 4.
+
+\subtask % (b)
+Identifikovanú funkciu $f$ je možné zapísať nasledovne:
+\begin{gather*}
+h(0) = 	(\sigma \circ \xi) \times (\sigma \circ \xi)()\\
+h(y+1) =  (\pi^2_{2} \times plus) \circ (\pi^3_{2} \times \pi^3_{3}) (y, h(y)) 
+\\\\
+f \equiv \pi^2_{1} \circ h
+\end{gather*}
+
+\end{mysolution}
+
+\task{2}{
+}
+
+\begin{mysolution}
+	
+\noindent Nech $M$ je množina realizácií jazyka $L$, ktoré majú ako univerzum množinu $\mathbb{N}$. Predpokladajme, že táto množina  $M$ je spočetná. Potom podľa definície spočetnosti existuje bijekcia $f: \mathbb{N} \longleftrightarrow M$. S využitím $f$ je možné zostaviť nekonečnú maticu, kde jej riadky $i$ budú zodpovedať danej realizácii $f(i)$ z $M$. Stĺpce budu zodpovedať predikátu s aritou 1 v jednotlivých ohodnoteniach $i$,  $i \in \mathbb{N}$. Dostaneme teda maticu:
+
+\begin{table}[!h]
+	\centering
+	\begin{tabular}{cccccc}
+		& $p(0)$	& $p(1)$	& $p(2)$	& ...   \\
+		$R_0 = f(0)$	& $a_{00}$	& $a_{01}$ 	& $a_{02}$ 	& ... & \\
+		$R_1 = f(1)$	& $a_{10}$ 	& $a_{11}$ 	& $a_{12}$ 	& ... & \\
+		$R_2 = f(2)$	& $a_{20}$ 	& $a_{21}$	& $a_{22}$ 	& ... & \\
+		...			& ... 	& 	... & ... 	& ...        
+	\end{tabular}
+\end{table}
+
+Prvok tejto matice, tj. hodnota $a_{ij}$, je 1 ak predikát v danej realizácii a pri danom ohodnotení je pravdivý, 0 ak nepravdivý.
+
+Uvažujme realizáciu $\overline{R}$. Realizácia $\overline{R}$ sa líši od každej $R_i = f(i), i \in \mathbb{N}$:\\
+- ak $a_{ii}$ = 0, potom predikát v danej realizácii a ohodnotení je pravdivý, čiže $p(i) = 1$\\
+- ak $a_{ii}$ = 1, potom predikát v danej realizácii a ohodnotení je nepravdivý, čiže $p(i) = 0$
+
+Zároveň však realizácia $\overline{R} \in M$, t.j. mala by sa nachádzať na nejakom riadku matice, čo však nie je možné, keďže sa $\overline{R}$ od každej realizácie líši práve v hodnote $a_{ii}$. Funkcia $f$ je teda surjektívna funkcia, čo je spor. Množina realizácií jazyka $L$, ktoré majú ako univerzum množinu $\mathbb{N}$, je teda nespočetná.
+\end{mysolution}
+
+\task{3}{
+}
+
+\begin{mysolution}{subtasks}
+\vspace{-15pt}
+\subtask % (a)
+Vzťah $\mathcal{O}(3^{2n}) \subseteq  \mathcal{O}(2^{3n})$:\\
+Predpokladajme, že tento vzťah platí.
+
+Potom $\exists c \in \mathbb{R}^+$ $\exists n_0 \in \mathbb{N}$ $\forall n \geq  n_0: 3^{2n} \leq c * 2^{3n}$.
+
+Potom tiež platí že  $\exists c \in \mathbb{R}^+$ $\exists n_0 \in \mathbb{N}$ $\forall n \geq  n_0: \frac{c * 2^{3n}}{3^{2n}} \geq 1$, keďže $3^{2n} \neq 0$ pre žiadne $n \geq 0$ a môžeme teda krátiť.
+
+Na druhú stranu ale platí, že 
+$\lim_{n\to\infty}  \frac{c * 2^{3n}}{3^{2n}} = \lim_{n\to\infty}  \frac{c * 8^n}{9^n} = c * \lim_{n\to\infty} (\frac{8}{9})^n  = c * 0 = 0$. 
+
+Čo je ale spor, keďže nemôže súčasne platiť $\forall n \geq  n_0: \frac{c * 2^{3n}}{3^{2n}} \geq 1$ a $\lim_{n\to\infty}  \frac{c * 2^{3n}}{3^{2n}} = 0$.
+
+Tento vzťah neplatí.
+\subtask % (b)
+
+Vzťah $\mathcal{O}(3^{2n}) \supseteq  \mathcal{O}(2^{3n})$:\\
+Predpokladajme, že tento vzťah platí.
+
+Potom $\exists c \in \mathbb{R}^+$ $\exists n_0 \in \mathbb{N}$ $\forall n \geq  n_0: 2^{3n} \leq c * 3^{2n}$.
+
+Potom tiež platí že $\exists c \in \mathbb{R}^+$ $\exists n_0 \in \mathbb{N}$ $\forall n \geq  n_0: \frac{c * 3^{2n}}{2^{3n}} \geq 1$, keďže $2^{3n} \neq 0$ pre žiadne $n \geq 0$ a môžeme teda krátiť.
+
+Ďalej platí, že  $\lim_{n\to\infty}  \frac{c * 3^{2n}}{2^{3n}} = \lim_{n\to\infty}  \frac{c * 9^n}{8^n} = c * \lim_{n\to\infty} (\frac{9}{8})^n = c * \infty = \infty$.
+
+Napr. pre $c = 1$ a $n_0 = 1$ platí $\forall n \geq  n_0: \frac{c * 3^{2n}}{2^{3n}} \geq 1$ a aj $\lim_{n\to\infty}  \frac{c * 3^{2n}}{2^{3n}} = \infty$.
+
+Tento vzťah platí.
+
+\subtask % (b)
+Vzťah $\mathcal{O}(3^{2n}) =  \mathcal{O}(2^{3n})$:\\
+Keďže vzťah $\supseteq$ platí, ale vzťah $\subseteq$ neplatí, nemôže teda ani platiť, že $\mathcal{O}(3^{2n}) =  \mathcal{O}(2^{3n})$.
+\end{mysolution}
+
+\task{4}{
+}
+
+\begin{mysolution}
+\noindent Pre dokázanie, že problém tety Kvety je NP-úplný, je potrebné ukázať, že tento problém patrí do NP a dokázať jeho NP-ťažkosť.\\
+Členstvo v NP: Založené na princípe uhádnutia riešenia (počtov kusov jednotlivých druhov cukroviek) a overenia, že sa skutočne jedná o riešenie (t.j. overiť podmienky z problému tety Kvety). Overenie podmienok sa skladá z výpočtu a overenia nerovníc obsahujúcich jednoduché aritmetické výrazy. Tieto činnosti je možné vykonať v polynomiálnom čase pomocou NTS. \\
+NP-ťažkosť: Dôkaz NP-ťažkosti vedieme polynomiálnou redukciou z ILP\footnote{https://en.wikipedia.org/wiki/Integer\_programming} (známy NP-úplný problém), kde redukujúci TS musí byť DTS a musí pracovať v polynomiálnom čase. Pracujeme s rozhodovacou variantou ILP, kde sa pýtame, či sústava $\overline{A}\overline{x} \leq \overline{b}$ má riešenie $\overline{x} \in \mathcal{Z}^n$.
+
+Popis redukcie ILP $\rightarrow$ problém tety Kvety:\\
+Problém tety Kvety je možné formulovať nasledovnou sústavou nerovníc:\\
+$\forall$ $1 \leq j \leq m$ (t.j. vytvoríme nerovnicu pre každú surovinu):\\
+ $A_{j1}* x_1 + A_{j2} * x_2 + ... + A_{jn} * x_n \leq b_j$
+\\\\
+Ďalej vieme, že v probléme tety Kvety existuje nasledovná podmienka:\\
+$x_1 + x_2 + \ldots + x_n \geq k$ \\
+
+Vytvorme instanciu problému tety Kvety takú, kde nech $k$ je 0. Potom získavame:\\
+$x_1 + x_2 + \ldots + x_n \geq 0$ \\
+A teda:\\
+$x_1, x_2, \ldots, x_n \geq 0$\\
+$x_1, x_2, \ldots, x_n \in \mathbb{Z}$\\
+\\
+Význam použitých premenných:\\
+$A_{ji}$ - množstvo (v mernej jednotke) suroviny druhu $j$ potrebnej na napečenie jedného kusu cukrovinky druhu $i$\\
+$b_j$ - nakúpené množstvo (v mernej jednotke) suroviny druhu $j$\\
+$x_i$ - počet kusov cukrovinky druhu $i$\\
+$m$ - počet druhov surovín\\
+$n$ - počet druhov cukroviek v kuchárke\\
+$k$ - počet požadovaných kusov cukroviniek (t.j. počet kamarátok)
+
+Odpoveď áno/nie na vytvorenú instanciu problému tety Kvety presne zodpovedá odpovedi rozhodovacej varianty ILP. Je zrejmé, že túto redukciu je možné (s vhodným kódovaním) implementovať úplným DTS pracujúcim v polynomiálnom čase. Sústava nerovníc má riešenie $\Leftrightarrow$ problém tety Kvety má riešenie.
+
+\end{mysolution}
+
+\task{5}{
+}
+
+\begin{mysolution}
+\noindent Navrhnutá Petriho sieť:	
+
+\begin{figure}[!h]
+		\begin{center}
+	\includegraphics[width=12cm,height=\textheight,keepaspectratio]{petrihosiet.png}
+	\caption{Petriho sieť prijimajúca jazyk $\{a^i(b^j)c^k \in \{a, b, c, (, )\}^\star \mid i \geq j = k\}$}
+	\end{center}
+\end{figure}	
+
+\end{mysolution}
+
+\end{document}
