@@ -171,3 +171,15 @@ Zubná ordinácia  -  Prvotna analyza a plan projektu (5/5), vysledne modely (26
 1. projekt - Optimilizacia sekvencneho kodu, vektorizacia (10/10)
 
 2. projekt - CUDA (15/15)
+
+#### Letny semester
+
+**PRL**
+
+1. projekt - paralelny Bucket sort (10/10)
+
+2. projekt - paralelny vypocet urovni vrcholov (?/10)
+
+**BZA**
+
+Zabezpecovacie techniky na urovni prekladacov (29/29)
