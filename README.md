@@ -183,3 +183,7 @@ Zubná ordinácia  -  Prvotna analyza a plan projektu (5/5), vysledne modely (26
 **BZA**
 
 Zabezpecovacie techniky na urovni prekladacov (29/29)
+
+**FLP**
+
+1. projekt - Simplify BKG (12/12)

@@ -1,0 +1,18 @@
+Projekt: simplify-bkg
+Autor: xbolva00
+
+Implementácia algoritmu:
+Program implementuje algoritmus na odstranie zbytocnych symbol v BKG. Prvy krok algoritmu je implementovany vo funkcii 
+firstAlgoStep, vypocet mnoziny neterminalov generujucich retazce, ktora je pre prvy krok nutna, je vo funkcii computeNt.
+Druhy krok algoritmu je implementovany vo funkcii secondAlgoStep, vypocet mnoziny dosiahnutelnych symbolov, ktora je pre
+druhy krok nutna, je vo funkcii computeV. Funkcie computeV a computeNt ako ukoncovaciu podmienku rekurzie vyuzivaju fakt,
+ze oba algoritmy musia byt konecne, kde pocet iteracii je zavisly od poctu neterminalov. Zlozenim funkcii firstAlgoStep a
+secondAlgoStep sa vykona cely vypocet algoritmu, tj. oba ciastocne kroky algoritmu.
+
+Overenie vstupnej gramatiky:
+Program pri nacitavani vstupu kontroluje, ci vstup je spravne zadana BKG. Kontrola syntaxe prebieha vo funkcii checkSyntax,
+kontrola spravnosti gramatiky vo funkcii checkGrammar. V pripade zistenej chyby je táto chyby propagovaná z rôznych miest
+programu do funkcie main, kde je jej popis vypisany na vystup a program konci.
+
+Overenie argumentov:
+Program v funkcii main kontroluje ci pocet argumentov je spravny a ci zadana volba je platna. Ak nie, program konci chybou.
