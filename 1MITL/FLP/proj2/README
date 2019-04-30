@@ -1,0 +1,27 @@
+
+Projekt: Program na riesenie rubikovej kocky
+Autor: xbolva00
+
+Preklad programu: make 
+Spustenie ukazkoveho testu: make run
+
+Popis implementacie:
+Program riesi rubikovu kocku, ktora je textovo zadana na vstup. Spracovanie vstupu je implementovane pomocou funkcii
+z input2.pl. Implementovanie riesenie je zalozene na prehladavani stavoveho priestoru, kde sa skusaju mozne rotacie
+(left, right, front, back, up, down) na kocke o 90 stupnov v smere aj proti smeru hodinovych ruciciek, az dokym nie
+je kocka spravne zlozena. Rotacie k vyrieseniu kocky sa priebezne ukladaju. Zoznam tychto tahov veducich ku zlozeniu
+kocky je nasledne po najdeni riesenia vypisany na vystup.
+
+Testy:
+Na otestovanie projektu je mozne pouzit prilozene testy s nazvom suboru indikujucim pocet tahov potrebnych na zlozenie
+kocky. Pomocou prikazu make run sa spusta riesenie kocky "6tahov.txt", ktoru program zlozi na 6 tahov. Pre odmeranie
+casu riesenia kocky je mozne pouzit nastroj time, napríklad: time flp19-log < 6tahov.txt.
+
+Casy pre vyriesenie kociek v prilozenych testov:
+1 tah - 0.027 sekundy
+2 tahy - 0.034 sekundy
+3 tahy - 0.038 sekundy
+4 tahy - 0.107 sekundy
+5 tahov - 0.83 sekundy
+6 tahov - 9.6 sekundy
+7 tahov - 1 minuta 53 sekund

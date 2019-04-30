@@ -187,3 +187,9 @@ Zabezpecovacie techniky na urovni prekladacov (29/29)
 **FLP**
 
 1. projekt - Simplify BKG (12/12)
+
+2. projekt - Rubikova kocka (8/8)
+
+**KKO**
+
+Kompresia obrazových dát s vyuºitím statického a adaptivneho Huffmanovho kódovania (30/30)
