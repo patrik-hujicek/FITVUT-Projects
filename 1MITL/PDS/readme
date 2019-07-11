@@ -1,0 +1,61 @@
+====== Zakladne informacie ====== 
+
+Autor: David Bolvansky
+Login: xbolva00
+
+====== Pouzitie na virtualnom stroji ====== 
+
+V priecinku, kde bol rozbaleny archiv xbolva00.zip, je mozne najst Python programy pds18-node, pds18-peer a pds18-rpc.
+
+====== Spustenie peerov a registracnych uzlov ====== 
+
+Priklad spustenia registracnych uzlov:
+python3 pds18-node.py --id 1 --reg-ipv4 10.0.2.15 --reg-port 6000
+python3 pds18-node.py --id 2 --reg-ipv4 10.0.2.15 --reg-port 6001
+
+Priklad spustenia peerov a ich napojenia na registracny uzol:
+python3 pds18-peer.py --id 1 --username xbolva00 --chat-ipv4 10.0.2.15 --chat-port 9000 --reg-ipv4 10.0.2.15 --reg-port 6000
+python3 pds18-peer.py --id 2 --username xbolva01 --chat-ipv4 10.0.2.15 --chat-port 9001 --reg-ipv4 10.0.2.15 --reg-port 6001
+
+====== Pouzitie RPC prikazov ====== 
+
+Zobrazenie databaze registracneho uzlu:
+python3 pds18-rpc.py --id 1 --node --command database
+
+Zobrazenie susedov registracneho uzlu:
+python3 pds18-rpc.py --id 1 --node --command neighbors
+
+Zobrazenie aktualneho zoznamu peerov v sieti s ich mapovanim: 
+python3 pds18-rpc.py --id 1 --peer --command peers
+
+Naviazanie susedstva medzi registracnymi uzlami:
+python3 pds18-rpc.py --id 1 --node --command connect --reg-ipv4 10.0.2.15 --reg-port 6001
+
+Poslanie spravy:
+python3 pds18-rpc.py --id 1 --peer --command message --from xbolva00 --to xbolva01 --message "Ahoj"
+
+Viac informacii o dalsich RPC prikazoch a o formate vystupov RPC prikazov je mozne najst v prilozenej dokumentacii vo forme pdf.
+
+====== Testovane so spoluziakmi ======
+
+xcervi21 Radim Cervinka
+xgrepl05 Filip Grepl
+xdekre00 Lukas Dekret
+xsuhaj02 Peter Suhaj
+xrusin03 Petr Rusinak
+xdobia11 Roman Dobias
+xvlnas00 Martin Vlnas
+xpoleh00 Dominik Polehna
+
+====== Rozsirenia projektu ======
+
+Jednoducha GUI aplikacia na posielanie sprav v Python Tkinter.
+
+Spustenie GUI:
+python3 pds18-gui.py
+
+Podrobnosti o GUI je mozne najst v dokumentacii projektu.
+
+====== Obmedzenia projektu ======
+
+Ziadne

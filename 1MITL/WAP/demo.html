@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="utf-8"/>
+	<meta name="author" content="Dávid Bolvanský">
+	<meta name="description" content="Demo dynamickej tabuľka">
+	<meta name="keywords" content="WAP, dynamická tabuľka, demo">
+	<link href="dynamicka_tabulka.css" rel="stylesheet" type="text/css">
+	<script src="dynamicka_tabulka.js"></script>
+    <title>Ukážka dynamickej tabuľky</title> 
+    
+    <script>
+    window.onload = function() {
+        createDynamicTable('demo-tabulka');
+    };
+    </script>
+</head>
+
+<body>
+    <h1>Ukážka dynamickej tabuľky</h1>
+
+    <table id="demo-tabulka">
+        <thead>
+            <tr>
+                <td data-sort-as="number">ID študenta (číselné radenie)</td>
+                <td data-sort-as="string">Meno (reťazcové radenie)</td>
+                <td data-sort-as="string">Priezvisko (reťazcové radenie)</td>
+                <td data-sort-as="number">Rodné číslo (číselné radenie)</td>
+                <td data-sort-as="number">Vek študenta (číselné radenie)</td>
+                <td data-sort-as="string-sensitive">Bydisko (senzitívne reťazcové radenie)</td>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr>
+                <td>14853</td>
+                <td>Viera</td>
+                <td>Malá</td>
+                <td>9801205143</td>
+                <td>20</td>
+                <td>Košice</td>
+            </tr>
+            <tr>
+                <td>18963</td>
+                <td>Peter</td>
+                <td>Novák</td>
+                <td>9502071325</td>
+                <td>23</td>
+                <td>Bardejov</td>
+            </tr>
+            <tr>
+                <td>17843</td>
+                <td>Adriana</td>
+                <td>Stránska</td>
+                <td>9411209532</td>
+                <td>24</td>
+                <td>Žilina</td>
+            </tr>
+            <tr>
+                <td>16892</td>
+                <td>Martin</td>
+                <td>Lipovský</td>
+                <td>9612158425</td>
+                <td>21</td>
+                <td>Trenčín</td>
+            </tr>
+            <tr>
+                <td>15896</td>
+                <td>Ivan</td>
+                <td>Mula</td>
+                <td>9510117741</td>
+                <td>23</td>
+                <td>Bratislava</td>
+            </tr>
+        </tbody>
+
+        <tfoot>
+            <tr>
+                <td>ID študenta</td>
+                <td>Meno</td>
+                <td>Priezvisko</td>
+                <td>Rodné číslo</td>
+                <td>Vek</td>
+                <td>Bydisko</td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+</html>

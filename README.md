@@ -192,4 +192,16 @@ Zabezpecovacie techniky na urovni prekladacov (29/29)
 
 **KKO**
 
-Kompresia obrazových dát s vyuºitím statického a adaptivneho Huffmanovho kódovania (30/30)
+Kompresia obrazových dát s využitím statického a adaptivneho Huffmanovho kódovania (30/30)
+
+**SPP**
+
+Detekcia a oprava kolísavých bitov v sade registrov (30/30)
+
+**WAP**
+
+Dynamická tabuľka (30/30)
+
+**PDS**
+
+Hybridná chatovacia P2P sieť (25/25)

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="utf-8"/>
+	<meta name="author" content="Dávid Bolvanský">
+	<meta name="description" content="Demo dynamickej tabuľka">
+	<meta name="keywords" content="WAP, dynamická tabuľka, navod">
+	<title>Použitie dynamickej tabuľky</title>
+</head>
+
+<body>
+    <h1>Návod k použitiu</h1>
+
+    <p>Projekt <b><i>Dynamická tabuľka</i></b> umožňuje pretransformovať ľubovoľnú tabuľku na dynamickú, ktorá obsahuje <br>
+    možnosť filtrovania a radenia v tabuľke. Po načítaní dokumentu sa volá funkcia <b><i>createDynamicTable</i></b> s jedným  <br>
+    parametrom, ktorým je identifikátor vybranej tabuľky. Po jej zavolaní sa pridá nad tabuľku textové pole určené <br> 
+    na vstup filtera a tlačidlá (symboly) na zostupné/vzostupné radenie. <br>
+    <br>
+    Pri akejkoľvek zmene textového poľa filtra sa volá funkcia <b><i>filterChanged</i></b>, ktorá skryje riadky v tabuľke, <br>
+    ktoré neobsahujú daný reťazec z filtera. Kontrola, či text v bunke tela tabuľky (hlavička a päta sa ignorujú) <br> 
+    neobsahuje daný reťazec, je v prípade, že atribút <i>sort-as</i> je nastavený na <i>string</i>, prevádzaná case insensitive, <br>
+    tj. nezáleží na veľkosti písmen. Použitím <i>string-sensitive</i> u atribútu <i>sort-as</i> je možné vynútiť kontrolu citlivú <br>
+    na veľkosť písmen. <br>
+    <br>
+    Radenie sa vykonáva vo funkcií <b><i>sortColumn</i></b>, ktorej parametrami je identifikátor (poradie) stĺpca, spôsob <br>
+    radenia  a smer radenia. Spôsob radenia daného stĺpca je možné špecifikovať atribútom <u>sort-as</u> u <i>td</i> prvku <br>
+    reprezentujúceho stĺpec v tabuľke, ktorý bude možné daným spôsobom radiť. Pre abecedné (reťazcové) <br> 
+    radenie je potrebné nastaviť atribút <i>sort-as</i> na reťazec <i>string</i>, pre číselné zas na <i>number</i>. V prípade, že tabuľka  <br>
+    nemá definovanú hlavičku, použije sa abecedné (reťazcové) radenie. Pre zostupné radenie je potrebné <br>
+    nastaviť smer radenia  na hodnotu <i>1</i>, pre vzostupné na hodnotu <i>0</i>. <br>
+    <br>
+    Ďalšie implementačné detaily je možné získať z komentárov v zdrojových kódoch. Ukážka dynamickej tabuľky je <a href="demo.html">tu</a>.
+    </p>
+    </table>
+</body>
+</html>

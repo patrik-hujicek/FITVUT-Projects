@@ -1,0 +1,46 @@
+
+/* Velkost textu v tele dokumentu */
+body {
+    font-size: 20px;
+}
+
+/* Vzhlad tabulky */
+table#demo-tabulka { 
+    background: grey;
+    color: white;
+}
+
+/* Vzhlad riadkov */
+table#demo-tabulka tr td{
+    line-height: 25px;
+}
+
+/* Vzhlad hlavicky */
+table#demo-tabulka thead { 
+    font-weight: bold;
+    background: rgb(200, 40, 40);
+}
+
+/* Vzhlad paticky */
+table#demo-tabulka tfoot { 
+    font-weight: bold;
+    background: rgb(200, 40, 40);
+}
+
+/* Vzhlad hlavicky sluziacej na filtrovanie a radenie */
+table#demo-tabulka #dynamic-head { 
+    background: rgb(200, 40, 40);
+    line-height: 30px;
+    height: 40px;    
+}
+
+/* Vzhlad a pozicia symbolov pre radenie */
+table#demo-tabulka #dynamic-head .sort-symbols { 
+    font-size: 25px;
+    color: yellow;
+    font-weight: bold;
+    padding: 5px 5px 0px 5px;
+    cursor: default;
+    float: right;
+}
+
