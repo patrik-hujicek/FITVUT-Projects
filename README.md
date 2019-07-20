@@ -178,7 +178,7 @@ Zubná ordinácia  -  Prvotna analyza a plan projektu (5/5), vysledne modely (26
 
 1. projekt - paralelny Bucket sort (10/10)
 
-2. projekt - paralelny vypocet urovni vrcholov (?/10)
+2. projekt - paralelny vypocet urovni vrcholov (10/10)
 
 **BZA**
 
