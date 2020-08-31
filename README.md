@@ -205,3 +205,37 @@ Dynamická tabuľka (30/30)
 **PDS**
 
 Hybridná chatovacia P2P sieť (25/25)
+
+## Druhy rocnik MIT
+
+#### Zimny semester
+
+**SIN**
+
+Inteligetne mesto Singapur (14/15)
+
+**BIO**
+
+Vliv rozlišení a natočení hlavy na detekci obličeje (18/18)
+
+**HSC**
+
+Implementacia FIR filtra (25/25)
+
+**GUX**
+
+1. projekt - Graficky editor (8/8)
+
+2. projekt - Barevné kódy rezistorů (12/12)
+
+#### Letny semester
+
+**NSB**
+
+XDP - eXpress Data Path - prezentácia (5/5)
+
+**KRY**
+
+1. projekt - Prolomení One time pad (8/8)
+
+2. projekt - Implementace RSA (7/7)

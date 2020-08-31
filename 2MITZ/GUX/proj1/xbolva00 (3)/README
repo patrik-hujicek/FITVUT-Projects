@@ -1,0 +1,10 @@
+Preklad na merline:
+1. xmkmf 
+2. make
+
+Preklad na eve:
+1. xmkmf 
+2. make LOCAL_LIBRARIES="-lXm -lXt -lSM -lICE -lXext -lX11"
+
+Spustenie:
+./draw

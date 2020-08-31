@@ -1,0 +1,35 @@
+Závislosti:
+
+pip3 install scikit-image
+pip3 install pandas
+apt install cmake
+pip3 install face_recognition
+pip3 install opencv-python
+pip3 install tensorflow
+pip3 install cvlib
+pip3 install mtcnn
+
+Testované na Kubuntu 18.03 LTS a Mac OS.
+
+Použitie skriptu:
+
+Vyber 50 fotografii s danou pixelovou sirkou tvare (napr. 90px)
+python3 BIO_project.py -i imagedir/ -o outimg -ffw 90 -ffl 50
+
+Hromadne znizenie rozlisenia podla downscale faktorov
+python3 BIO_project.py -i imagedir/ -o downscaled/ -df 0.4 0.7 0.9
+
+Vyhodnotenie presnosti detektorov pri zmene rozslisenia fotografii
+python3 BIO_project.py -i downscaled/ -deaf 0.4 0.7 0.9
+
+Hromadna zmena jasu (stmavenie) podla faktorov jasu
+python3 BIO_project.py -i imagedir/ -o dimmed/ -df 0.5 0.8
+
+Hromadna zmena jasu (zosvetlenie) podla faktorov jasu
+python3 BIO_project.py -i imagedir/ -o lightened/ -df 2.0 5.0 6.0
+
+Vyhodnotenie presnosti detektorov pri zmene jasu (stmavenie) fotografii
+python3 BIO_project.py -i dimmed/ -beaf 8
+
+Vyhodnotenie presnosti detektorov pri zmene jasu (zosvetlenie) fotografii
+python3 BIO_project.py -i lightened/ -beaf
